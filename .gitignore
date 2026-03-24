@@ -1,0 +1,33 @@
+# 1. Data files (CRITICAL: Chặn rò rỉ data OULAD lên GitHub)
+data/
+*.csv
+*.tsv
+*.parquet
+*.zip
+
+# 2. ML Models & Logs (Chặn đẩy model weights lên Git)
+*.pkl
+*.h5
+*.pt
+*.pth
+*.joblib
+models/
+runs/
+
+# 3. Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# 4. Python cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+.env
+
+# 5. IDE & OS configuration (VS Code, Mac, Windows)
+.vscode/
+.DS_Store
+Thumbs.db
