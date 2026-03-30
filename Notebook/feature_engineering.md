@@ -49,3 +49,104 @@ Chuẩn hóa dữ liệu đánh giá để đảm bảo tính công bằng giữ
 * **Xử lý mất cân bằng**: Áp dụng trọng số lớp (class weights) cho nhóm sinh viên đạt loại Giỏi (Distinction) do nhóm này chiếm tỷ lệ nhỏ.
 * **Leakage Audit**: Kiểm tra lại toàn bộ quy trình để đảm bảo không sử dụng bất kỳ thông tin nào phát sinh sau ngày 135 (đặc biệt là điểm thi cuối kỳ).
 * **Module Consistency**: Đảm bảo tất cả các mã môn học đều xuất hiện ở cả hai tập dữ liệu huấn luyện và kiểm tra.
+
+---
+ 
+## 7. Objective & Metric
+ 
+* **Bài toán**: Phân loại 4 class (Pass / Fail / Withdrawn / Distinction), ưu tiên phát hiện **Withdrawn**.
+* **Metric chính**: `Recall(Withdrawn)` — tối ưu hóa khả năng phát hiện sinh viên sắp rút môn.
+* **Guardrail**: `Macro-F1` — đảm bảo mô hình không bỏ qua hoàn toàn các class còn lại.
+* **Không dùng**: Overall Accuracy — bị méo do mất cân bằng class.
+ 
+---
+ 
+## 8. Setup & Reproducibility
+ 
+* `CUTOFF_DAY = 135`
+* `RANDOM_SEED = 42` dùng xuyên suốt toàn bộ pipeline
+* Ghi lại phiên bản dữ liệu và feature set khi lưu artifact để tái hiện thí nghiệm.
+ 
+---
+ 
+## 9. Định nghĩa "Safe Assessment"
+ 
+* **Safe** = `assessment.deadline <= CUTOFF_DAY`
+* Định nghĩa dựa trên **deadline của bài**, không phải ngày sinh viên thực nộp — vì nộp trễ chính là signal rủi ro quan trọng.
+* `n_safe_tma_in_module` = số assessment có `type == 'TMA'` và `deadline <= 135` trong module đó.
+* `n_safe_cma_in_module` = số assessment có `type == 'CMA'` và `deadline <= 135` trong module đó.
+* Toàn bộ Exam bị drop trước khi tính feature vì Exam luôn diễn ra sau ngày 135 → leakage 100%.
+ 
+---
+ 
+## 10. Edge Cases Assessment
+ 
+### Module GGG (TMA weight = 0)
+* `weighted_score_before_cutoff = NaN` (mẫu số = 0, không tính được)
+* Thêm cột `has_weighted_score = 0` để mô hình phân biệt GGG với các module bình thường.
+* Tín hiệu thay thế: dùng **TMA submission count** vì nộp bài vẫn là engagement signal dù weight = 0.
+ 
+### Module AAA, EEE (không có CMA trước cutoff)
+* `cma_submission_rate = -1` (phân biệt "module không có CMA" với "có CMA nhưng không nộp")
+* Không dùng `0` vì gây nhầm lẫn với trường hợp sinh viên không nộp bài.
+ 
+### Quy tắc chung cho submission rate
+| Trường hợp | Giá trị |
+|---|---|
+| Module không có CMA/TMA trước cutoff | `-1` |
+| Có assessment nhưng sinh viên không nộp | `0` |
+| Bình thường | `n_submitted / n_safe_in_module` |
+ 
+### avg_days_before_deadline âm
+* Giá trị âm = sinh viên nộp trễ → **giữ nguyên**, không clip.
+* Đây là signal hành vi quan trọng, clip về 0 sẽ mất thông tin.
+ 
+---
+ 
+## 11. Xử lý Student không có VLE Record
+ 
+Sinh viên không xuất hiện trong bảng `studentVle` (không có bất kỳ tương tác nào):
+* Toàn bộ VLE features → fill `0`
+* Thêm cột `has_vle_activity = 0` để mô hình phân biệt với sinh viên có tương tác thấp.
+ 
+---
+ 
+## 12. Weekly Clicks — Scope
+ 
+* Số tuần = `ceil(135 / 7) = 20 tuần` → tạo 20 cột `clicks_week_1` đến `clicks_week_20`.
+* Tuần sinh viên không active → fill `0`.
+* Tuần nằm ngoài khoảng active của sinh viên (ví dụ đăng ký muộn) → fill `0`.
+ 
+---
+ 
+## 13. Pipeline Order
+ 
+Thứ tự thực hiện bắt buộc để tránh leakage:
+ 
+```
+Load 5 bảng
+    → Tiền xử lý & Semantic Nulls (Section 1)
+    → Filter: drop Exam, chỉ giữ data <= CUTOFF_DAY
+    → Tính toán toàn bộ features (Section 2–5 + 10–12)
+    → Split theo Student-level (id_student) + Stratified (final_result × code_module)
+    → Encode & Scale chỉ fit trên Train, transform cả Train và Test
+```
+ 
+* **Encode/Scale phải sau split** — nếu làm trước sẽ bị data leakage từ Test vào Train.
+* **Student-level split**: nhóm toàn bộ records của cùng một `id_student` về cùng một phía (Train hoặc Test) để tránh student leakage (12.3% sinh viên có nhiều records).
+ 
+---
+ 
+## 14. Encoding & Scaling Chi Tiết
+ 
+### Ordinal Encoding
+* `highest_education`: No Formal Quals < Lower Than A Level < A Level or Equivalent < HE Qualification < Post Graduate Qualification
+* `age_band`: 0-35 < 35-55 < 55<=
+* `imd_band`: 0-10% < 10-20% < ... < 90-100% < Unknown (Unknown = 10, cuối thang)
+ 
+### Categorical Encoding
+* `module_semester` (AAA_B, AAA_J, ...): Label Encoding — đủ dùng cho tree-based model, không cần one-hot.
+ 
+### Scaling
+* Tree-based model (Random Forest, XGBoost): **không cần scaling**.
+* Nếu thử Logistic Regression: dùng `StandardScaler`, fit chỉ trên Train.
