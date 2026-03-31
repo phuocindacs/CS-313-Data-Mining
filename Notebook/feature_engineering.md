@@ -70,5 +70,6 @@ Quy tắc xác định **Safe Assessment**: Chỉ tính các bài có `deadline 
 2. Lọc bỏ Exam và các dữ liệu phát sinh sau ngày 135.
 3. Tính toán toàn bộ các tính năng (Sections 2-5).
 4. Thực hiện Split dữ liệu (Train/Test).
+   → Split theo Student-level (id_student) + Stratified (final_result × code_module)
 5. Thực hiện Encoding và Scaling (Chỉ fit trên tập Train).
 6. Huấn luyện và đánh giá mô hình.
