@@ -1,0 +1,150 @@
+{
+  "version": "xgb_cat_tabdl_stacking_v1",
+  "primary_metric": "macro_f1",
+  "n_features": 64,
+  "feature_cols": [
+    "num_of_prev_attempts",
+    "studied_credits",
+    "pre_course_clicks",
+    "pre_course_active_days",
+    "has_pre_course_activity",
+    "last_active_day",
+    "active_days",
+    "max_daily_clicks",
+    "median_daily_clicks",
+    "first_active_day",
+    "days_since_last_active",
+    "clicks_per_active_day",
+    "clicks_week_0",
+    "clicks_week_1",
+    "clicks_quiz",
+    "date_registration",
+    "total_assessments",
+    "weighted_score_before_cutoff",
+    "has_weighted_score",
+    "cma_submission_rate",
+    "tma_submission_rate",
+    "avg_days_before_deadline",
+    "n_missing_submission",
+    "score_std",
+    "score_min",
+    "score_median",
+    "pct_score_above_80",
+    "pct_score_above_90",
+    "score_cv",
+    "ratio_forumng",
+    "ratio_oucontent",
+    "ratio_homepage",
+    "ratio_quiz",
+    "ratio_subpage",
+    "score_x_active_rate",
+    "high_consistent",
+    "active_days_last_4weeks",
+    "consecutive_zero_weeks",
+    "n_submitted_early",
+    "n_submitted_late",
+    "submission_trend",
+    "score_early",
+    "score_late",
+    "score_trend",
+    "n_late_submissions",
+    "click_slope",
+    "click_slope_r2",
+    "highest_education_encoded",
+    "age_band_encoded",
+    "imd_band_encoded",
+    "semester_enc",
+    "module_semester_encoded",
+    "region_East Midlands Region",
+    "region_Ireland",
+    "region_London Region",
+    "region_North Region",
+    "region_North Western Region",
+    "region_Scotland",
+    "region_South East Region",
+    "region_South Region",
+    "region_South West Region",
+    "region_Wales",
+    "region_West Midlands Region",
+    "region_Yorkshire Region"
+  ],
+  "models": [
+    "XGBoost",
+    "CatBoost",
+    "TabularDL(MLP)"
+  ],
+  "stacking": {
+    "n_folds": 5,
+    "meta_learner": "LogisticRegression",
+    "meta_feature_dim": 12,
+    "anti_leakage": "OOF predictions via StratifiedKFold"
+  },
+  "results": [
+    {
+      "name": "XGBoost",
+      "accuracy": 0.7194486983154671,
+      "macro_f1": 0.6410046851378567,
+      "weighted_f1": 0.7040833229538118
+    },
+    {
+      "name": "CatBoost",
+      "accuracy": 0.7160796324655436,
+      "macro_f1": 0.6427919576220873,
+      "weighted_f1": 0.7020622746786706
+    },
+    {
+      "name": "Tabular DL (MLP)",
+      "accuracy": 0.7013782542113323,
+      "macro_f1": 0.6540888880852966,
+      "weighted_f1": 0.7007301742815897
+    },
+    {
+      "name": "Stacking (OOF + LogisticRegression)",
+      "accuracy": 0.725114854517611,
+      "macro_f1": 0.6532226855694081,
+      "weighted_f1": 0.7113829678894334
+    },
+    {
+      "name": "Soft Voting (Equal: XGB+Cat+TabDL)",
+      "accuracy": 0.7249617151607963,
+      "macro_f1": 0.6539837195165972,
+      "weighted_f1": 0.7118374692070928
+    }
+  ],
+  "best": {
+    "name": "Tabular DL (MLP)",
+    "accuracy": 0.7013782542113323,
+    "macro_f1": 0.6540888880852966,
+    "weighted_f1": 0.7007301742815897
+  },
+  "best_params": {
+    "xgb": {
+      "n_estimators": 428,
+      "max_depth": 9,
+      "learning_rate": 0.03378196333189865,
+      "subsample": 0.7536000987084364,
+      "colsample_bytree": 0.7612409664029487,
+      "min_child_weight": 7,
+      "gamma": 0.13093104493217295,
+      "reg_alpha": 2.960766128864701e-07,
+      "reg_lambda": 0.00046118335113553606
+    },
+    "cat": {
+      "iterations": 1216,
+      "learning_rate": 0.06853772561078811,
+      "depth": 6,
+      "l2_leaf_reg": 0.014255269997634165,
+      "random_strength": 0.0600364687998749,
+      "bagging_temperature": 0.710494380529025
+    },
+    "tabdl": {
+      "hidden_dim": 512,
+      "num_layers": 4,
+      "dropout": 0.4301539769356212,
+      "lr": 0.0010215712659767436,
+      "weight_decay": 5.883380213138414e-07,
+      "batch_size": 256,
+      "epochs": 70
+    }
+  }
+}
