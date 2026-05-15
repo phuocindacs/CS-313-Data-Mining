@@ -1,0 +1,136 @@
+\documentclass[a4paper]{article}
+\usepackage[left=3cm,right=3cm,top=2.5cm,bottom=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{changepage}
+\usepackage{amsmath}
+\usepackage{xurl}
+\usepackage[utf8]{vietnam}
+\usepackage{tocloft}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{scrextend}
+\changefontsizes{14pt}
+\usetikzlibrary{calc}
+\usepackage{indentfirst}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0}
+}
+\setcounter{tocdepth}{2}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\textbf{CS313 - Khai thác Dữ liệu}}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\renewcommand{\headrulewidth}{0.5pt}
+
+\begin{document}
+\setlength{\parskip}{0.3em}
+
+% ============================================================
+%  TRANG BÌA
+% ============================================================
+\begin{titlepage}
+\begin{tikzpicture}[remember picture,overlay,inner sep=0,outer sep=0]
+     \draw[blue!70!black,line width=4pt]
+       ([xshift=-1.5cm,yshift=-2cm]current page.north east) coordinate (A)
+       --([xshift=1.5cm,yshift=-2cm]current page.north west) coordinate(B)
+       --([xshift=1.5cm,yshift=2cm]current page.south west) coordinate (C)
+       --([xshift=-1.5cm,yshift=2cm]current page.south east) coordinate(D)
+       --cycle;
+     \draw ([yshift=0.5cm,xshift=-0.5cm]A)--([yshift=0.5cm,xshift=0.5cm]B)--
+     ([yshift=-0.5cm,xshift=0.5cm]B)--([yshift=-0.5cm,xshift=-0.5cm]B)--
+     ([yshift=0.5cm,xshift=-0.5cm]C)--([yshift=0.5cm,xshift=0.5cm]C)--
+     ([yshift=-0.5cm,xshift=0.5cm]C)--([yshift=-0.5cm,xshift=-0.5cm]D)--
+     ([yshift=0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=0.5cm]D)--
+     ([yshift=-0.5cm,xshift=0.5cm]A)--([yshift=-0.5cm,xshift=-0.5cm]A)--
+     ([yshift=0.5cm,xshift=-0.5cm]A);
+     \draw ([yshift=-0.3cm,xshift=0.3cm]A)--([yshift=-0.3cm,xshift=-0.3cm]B)--
+     ([yshift=0.3cm,xshift=-0.3cm]B)--([yshift=0.3cm,xshift=0.3cm]B)--
+     ([yshift=-0.3cm,xshift=0.3cm]C)--([yshift=-0.3cm,xshift=-0.3cm]C)--
+     ([yshift=0.3cm,xshift=-0.3cm]C)--([yshift=0.3cm,xshift=0.3cm]D)--
+     ([yshift=-0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=-0.3cm]D)--
+     ([yshift=0.3cm,xshift=-0.3cm]A)--([yshift=0.3cm,xshift=0.3cm]A)--
+     ([yshift=-0.3cm,xshift=0.3cm]A);
+\end{tikzpicture}
+
+\begin{center}
+    \fontsize{13pt}{17pt}\selectfont
+    \textbf{ĐẠI HỌC QUỐC GIA TP. HỒ CHÍ MINH}
+    \vspace{10pt}\\
+    \textbf{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN}
+\end{center}
+\vspace{10pt}
+\begin{center}
+    % Đặt logo UIT vào figures/UIT_Logo.jpg (xem report/README.md)
+    % \includegraphics[scale=0.5]{figures/UIT_Logo.jpg}
+
+    \vspace{20pt}
+    \fontsize{16pt}{17pt}\selectfont
+    \textbf{BÁO CÁO ĐỒ ÁN CUỐI KỲ}
+    \vspace{6pt}\\
+    \fontsize{13pt}{17pt}\selectfont
+    \textbf{CS313 - KHAI THÁC DỮ LIỆU}
+\end{center}
+
+\vspace{5pt}
+\begin{center}
+    \hrulefill \\
+    \vspace{10pt}
+    \fontsize{17pt}{20pt}\selectfont
+    \textbf{HỆ THỐNG CẢNH BÁO SỚM\\ KẾT QUẢ HỌC TẬP SINH VIÊN\\ TRÊN BỘ DỮ LIỆU OULAD}
+    \vspace{6pt}\\
+    \hrulefill
+\end{center}
+
+\vspace{30pt}
+\begin{adjustwidth}{3cm}{0cm}
+    \fontsize{14pt}{17pt}\selectfont
+    \textbf{Giảng viên hướng dẫn:} \\
+    \hspace*{1cm}TS. Nguyễn Gia Tuấn Anh
+\end{adjustwidth}
+
+\vspace{10pt}
+\begin{adjustwidth}{3cm}{0cm}
+    \fontsize{14pt}{17pt}\selectfont
+    \textbf{Nhóm Sinh viên:}
+\end{adjustwidth}
+
+\begin{center}
+\fontsize{14pt}{17pt}\selectfont
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Họ tên} & \textbf{MSSV}\\
+\hline
+Văn Đức Tân & 24521586\\
+% TODO: thêm thành viên còn lại nếu có
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{40pt}
+\begin{center}
+    \fontsize{14pt}{17pt}\selectfont
+    \textbf{Thành phố Hồ Chí Minh, Tháng 5/2026}
+\end{center}
+\end{titlepage}
+
+% ============================================================
+%  MỤC LỤC
+% ============================================================
+\tableofcontents
+\newpage
+
+\input{section_I.tex}
+\input{section_II.tex}
+
+\end{document}

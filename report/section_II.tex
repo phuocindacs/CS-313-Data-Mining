@@ -1,0 +1,181 @@
+% ============================================================
+%  CHƯƠNG II — KHÁM PHÁ DỮ LIỆU (EDA)
+% ============================================================
+\section{Khám phá dữ liệu (Exploratory Data Analysis)}
+
+EDA là bước nền tảng quyết định mọi lựa chọn feature engineering ở giai
+đoạn sau. Mục tiêu phần này gồm 3 trục: (1) hiểu cấu trúc và ngữ nghĩa
+của null, (2) xác định tín hiệu mạnh trong các nhóm feature, (3) phát
+hiện các \textit{leakage} tiềm tàng.
+
+% ------------------------------------------------------------
+\subsection{Phân tích Null theo ngữ nghĩa (Semantic Null)}
+
+Quan trọng nhất: \textbf{null không phải lúc nào cũng là “thiếu dữ
+liệu”}. Nhiều cột null mang ý nghĩa cụ thể và phải xử lý đúng để giữ
+được tín hiệu.
+
+\begin{center}
+\begin{tabular}{|l|p{5cm}|p{4cm}|}
+\hline
+\textbf{Cột} & \textbf{Ý nghĩa thực} & \textbf{Cách xử lý}\\
+\hline
+\texttt{date\_unregistration} NULL  & Sinh viên không rút môn         & Giữ NULL, không dropna()\\
+\texttt{date\_unregistration} có giá trị & Sinh viên đã rút môn       & Giữ nguyên (nhưng có risk leakage)\\
+\texttt{score} NULL                 & Sinh viên không nộp bài         & \texttt{fillna(0)}\\
+\texttt{imd\_band} NULL             & Không map được vào vùng UK      & Encode "Unknown"\\
+\texttt{week\_from}, \texttt{week\_to} NULL & Tài nguyên không gắn tuần & Drop 2 cột\\
+\texttt{date} (assessments) NULL    & Không biết deadline             & Drop khi join\\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Pattern null score theo} \texttt{final\_result}:
+
+\begin{itemize}[leftmargin=*]
+    \item Withdrawn: $\approx 0.40\%$ null score — cao nhất.
+    \item Fail: $\approx 0.25\%$.
+    \item Pass: $\approx 0.03\%$.
+    \item Distinction: $0.0\%$.
+\end{itemize}
+
+$\Rightarrow$ \texttt{fillna(0)} là semantically correct: không nộp bài
+$=$ điểm 0, và chính pattern này giúp model học signal phân biệt
+Withdrawn / Fail vs Pass / Distinction.
+
+% ------------------------------------------------------------
+\subsection{Biến mục tiêu (Target Variable)}
+
+\subsubsection{Phân phối nhãn}
+
+\begin{center}
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Nhãn} & \textbf{Số lượng} & \textbf{Tỉ lệ}\\
+\hline
+Pass         & 12.361 & 37,9\%\\
+Withdrawn    & 10.156 & 31,2\%\\
+Fail         & 7.052  & 21,6\%\\
+Distinction  & 3.024  &  9,3\%\\
+\hline
+\end{tabular}
+\end{center}
+
+$\Rightarrow$ Class imbalance — Distinction chỉ chiếm $9,3\%$. Cần áp
+dụng \textit{stratified split} và \texttt{class\_weight} khi huấn luyện
+mô hình.
+
+\subsubsection{Tín hiệu từ nhóm nhân khẩu học (Demographics)}
+
+\begin{center}
+\begin{tabular}{|l|c|p{6.5cm}|}
+\hline
+\textbf{Feature} & \textbf{Tín hiệu} & \textbf{Ghi chú}\\
+\hline
+\texttt{num\_of\_prev\_attempts} & Mạnh    & Càng cao càng rủi ro\\
+\texttt{highest\_education}      & Trung bình & HE Qualification pass cao nhất\\
+\texttt{imd\_band}               & Trung bình & 90--100\% pass tốt hơn rõ rệt\\
+\texttt{age\_band}               & Trung bình & 0--35 Withdrawn nhiều nhất\\
+\texttt{studied\_credits}        & Yếu     & Overlap lớn giữa 4 nhóm\\
+\texttt{gender}                  & Rất yếu & Gần như không phân biệt M/F\\
+\hline
+\end{tabular}
+\end{center}
+
+\textit{Lưu ý}: \texttt{studied\_credits} là số tín chỉ đăng ký, KHÔNG
+phải điểm số.
+
+% ------------------------------------------------------------
+\subsection{Kiểm tra cấu trúc Module (Module Structure Audit)}
+
+\textbf{Insight cốt lõi}: cấu trúc đánh giá giữa các module khác nhau
+hoàn toàn. Không thể so sánh raw score cross-module.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|p{4cm}|}
+\hline
+\textbf{Module} & \textbf{CMA} & \textbf{Exam weight} & \textbf{TMA weight} & \textbf{Đặc điểm}\\
+\hline
+AAA & 0  & 200 & 200 & Không có CMA\\
+BBB & 15 & 400 & 385 & Nặng TMA\\
+CCC & 8  & 400 & 150 & CMA tỉ lệ đáng kể\\
+DDD & 7  & 400 & 375 & Nặng TMA\\
+EEE & 0  & 300 & 300 & Không có CMA\\
+FFF & 28 & 400 & 400 & CMA nhiều nhất\\
+GGG & 18 & 300 & \textbf{0} & TMA không tính điểm\\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Hệ quả thiết kế feature}:
+
+\begin{enumerate}[leftmargin=*]
+    \item Thêm \texttt{code\_module} làm categorical feature để mô hình
+    tự học distribution shift theo module.
+    \item Dùng \texttt{weighted\_score} thay vì \texttt{mean(score)}.
+    \item Chuẩn hóa submission rate:
+    $\dfrac{n\_submitted}{n\_safe\_available\_in\_module}$ thay vì đếm
+    tuyệt đối.
+    \item Riêng module \textbf{GGG} (TMA weight $= 0$): thêm cờ
+    \texttt{has\_weighted\_score = 0} để model phân biệt.
+\end{enumerate}
+
+% ------------------------------------------------------------
+\subsection{Hiệu ứng Presentation (B vs J)}
+
+So sánh hai đợt khai giảng (B = February, J = October):
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Đợt} & \textbf{Pass rate} & \textbf{$n\_students$}\\
+\hline
+B (Feb) & 43,67\% & 12.488\\
+J (Oct) & — / TODO & — / TODO\\
+\hline
+\end{tabular}
+\end{center}
+
+$\Rightarrow$ Tính năng \texttt{module\_semester} (ghép
+\texttt{code\_module \_ code\_presentation}) chứa tín hiệu hữu ích — sẽ
+được mã hóa qua Label Encoding ở phần feature engineering.
+
+% ------------------------------------------------------------
+\subsection{Phân tích Leakage}
+
+Các nguồn rò rỉ dữ liệu cần loại bỏ trước khi xây feature:
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{date\_unregistration}: biết được sinh viên đã
+    Withdrawn $\Rightarrow$ \textbf{drop}.
+    \item Bài thi cuối kỳ (Exam) có deadline $> 135$ nhưng correlate
+    100\% với final\_result $\Rightarrow$ \textbf{lọc bỏ} khi tính
+    feature.
+    \item Mọi tương tác VLE với \texttt{date $>$ 135} $\Rightarrow$
+    cắt theo \texttt{CUTOFF\_DAY}.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection{Tổng kết EDA}
+
+\begin{itemize}[leftmargin=*]
+    \item Null cần được xử lý theo \textbf{ngữ nghĩa}, không phải mặc
+    định \texttt{dropna()} hay \texttt{mean imputation}.
+    \item Class imbalance nghiêng về Pass, Distinction là lớp thiểu
+    số $\Rightarrow$ cần stratified split và metric Macro-F1.
+    \item Cấu trúc đánh giá khác nhau giữa các module $\Rightarrow$
+    feature phải được chuẩn hóa relative (rate) thay vì absolute
+    (count).
+    \item Hai nguồn leakage chính: \texttt{date\_unregistration} và
+    bài thi cuối kỳ $\Rightarrow$ phải loại bỏ trước khi train.
+\end{itemize}
+
+\textbf{Câu hỏi mở}:
+
+\begin{itemize}[leftmargin=*]
+    \item Có nên tách model riêng cho từng nhóm module (AAA/EEE vs
+    GGG vs còn lại) thay vì để \texttt{code\_module} dạng categorical?
+    \item Pass rate đợt J cụ thể bao nhiêu — cần bổ sung từ notebook.
+\end{itemize}
+
+\newpage
