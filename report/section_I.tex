@@ -1,0 +1,56 @@
+% ============================================================
+%  CHƯƠNG I — GIỚI THIỆU
+% ============================================================
+\section{Giới thiệu đề tài}
+
+\subsection{Bối cảnh và động lực}
+
+Hệ thống học trực tuyến (Virtual Learning Environment — VLE) ngày càng phổ
+biến, kéo theo nhu cầu phát hiện sớm sinh viên có nguy cơ rớt môn hoặc rút
+môn để kịp thời can thiệp. Bộ dữ liệu \textbf{OULAD} (Open University
+Learning Analytics Dataset) cung cấp đầy đủ thông tin nhân khẩu học, đăng
+ký, tương tác VLE và kết quả đánh giá của 32.593 sinh viên trên 7 module
+học. Đây là dữ liệu lý tưởng để xây dựng mô hình cảnh báo sớm.
+
+\subsection{Mục tiêu đề tài}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Bài toán}: Phân loại 4 nhãn kết quả cuối khóa của sinh
+    viên — \textit{Pass}, \textit{Fail}, \textit{Withdrawn},
+    \textit{Distinction}.
+    \item \textbf{Điểm cắt dự báo}: Sử dụng dữ liệu trong khoảng
+    $[0, 135]$ ngày (\texttt{CUTOFF\_DAY = 135}) — tương ứng khoảng nửa
+    đầu khóa học — để dự báo kết quả cuối khóa.
+    \item \textbf{Ưu tiên}: Tối đa hóa khả năng phát hiện sớm nhóm
+    \textit{Withdrawn} (sinh viên có khả năng bỏ học).
+    \item \textbf{Metric chính}: \texttt{Recall (Withdrawn)} và
+    \texttt{Macro-F1} để cân bằng giữa các lớp.
+\end{itemize}
+
+\subsection{Phạm vi báo cáo}
+
+Báo cáo trình bày toàn bộ pipeline khai thác dữ liệu theo trình tự:
+khám phá dữ liệu (EDA) $\rightarrow$ tiền xử lý $\rightarrow$ feature
+engineering $\rightarrow$ huấn luyện và đánh giá mô hình. Phần II tập
+trung vào EDA — bước nền tảng cho mọi quyết định feature engineering ở
+các phần sau.
+
+\subsection{Cấu trúc bộ dữ liệu OULAD}
+
+\begin{center}
+\begin{tabular}{|l|r|p{5cm}|}
+\hline
+\textbf{File} & \textbf{Số dòng} & \textbf{Mô tả}\\
+\hline
+\texttt{studentInfo.csv}         & 32.593      & Thông tin nhân khẩu học sinh viên\\
+\texttt{studentRegistration.csv} & 32.593      & Ngày đăng ký / rút môn\\
+\texttt{studentAssessment.csv}   & 173.912     & Điểm các bài đánh giá\\
+\texttt{studentVle.csv}          & 10.655.280  & Lượt click trên VLE theo ngày\\
+\texttt{assessments.csv}         & 206         & Metadata bài đánh giá (loại, deadline, weight)\\
+\texttt{courses.csv}             & 22          & Metadata module–presentation\\
+\texttt{vle.csv}                 & 6.364       & Metadata tài nguyên VLE\\
+\hline
+\end{tabular}
+\end{center}
+
+\newpage
