@@ -16,7 +16,7 @@ liệu”}. Nhiều cột null mang ý nghĩa cụ thể và phải xử lý đ�
 được tín hiệu.
 
 \begin{center}
-\begin{tabular}{|l|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5.5cm}|p{4.5cm}|p{4cm}|}
 \hline
 \textbf{Cột} & \textbf{Ý nghĩa thực} & \textbf{Cách xử lý}\\
 \hline
@@ -68,7 +68,7 @@ mô hình.
 \subsubsection{Tín hiệu từ nhóm nhân khẩu học (Demographics)}
 
 \begin{center}
-\begin{tabular}{|l|c|p{6.5cm}|}
+\begin{tabular}{|l|c|p{5.5cm}|}
 \hline
 \textbf{Feature} & \textbf{Tín hiệu} & \textbf{Ghi chú}\\
 \hline
@@ -92,7 +92,7 @@ phải điểm số.
 hoàn toàn. Không thể so sánh raw score cross-module.
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|p{4cm}|}
+\begin{tabular}{|c|c|c|c|p{3cm}|}
 \hline
 \textbf{Module} & \textbf{CMA} & \textbf{Exam weight} & \textbf{TMA weight} & \textbf{Đặc điểm}\\
 \hline
@@ -116,7 +116,7 @@ GGG & 18 & 300 & \textbf{0} & TMA không tính điểm\\
     \item Chuẩn hóa submission rate:
     $\dfrac{n\_submitted}{n\_safe\_available\_in\_module}$ thay vì đếm
     tuyệt đối.
-    \item Riêng module \textbf{GGG} (TMA weight $= 0$): thêm cờ
+    \item Riêng module \textbf{GGG} (TMA weight $= 0$): thêm cờ\\
     \texttt{has\_weighted\_score = 0} để model phân biệt.
 \end{enumerate}
 
@@ -136,7 +136,7 @@ J (Oct) & — / TODO & — / TODO\\
 \end{tabular}
 \end{center}
 
-$\Rightarrow$ Tính năng \texttt{module\_semester} (ghép
+$\Rightarrow$ Tính năng \texttt{module\_semester} (ghép\\
 \texttt{code\_module \_ code\_presentation}) chứa tín hiệu hữu ích — sẽ
 được mã hóa qua Label Encoding ở phần feature engineering.
 
