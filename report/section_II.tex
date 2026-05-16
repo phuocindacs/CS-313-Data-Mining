@@ -51,23 +51,40 @@ môn} (giữ NULL); \texttt{score} NULL nghĩa là \textit{không nộp bài}
 $\Rightarrow$ \texttt{fillna(0)} — chính pattern này tự là tín hiệu
 phân biệt Withdrawn/Fail với Pass/Distinction.
 
-Chi-square trên 8 biến categorical trong \texttt{studentInfo} chỉ có
-3 biến có signal đáng kể; \texttt{gender}, \texttt{disability},
-\texttt{studied\_credits} signal rất yếu nên bị loại.
+Notebook EDA (Section~10) chạy Chi-square trên 8 biến categorical so
+với \texttt{final\_result}, output Chi$^2$ + $p$-value như sau (rank
+theo Chi$^2$ giảm dần):
 
 \begin{center}
-\begin{tabular}{|l|c|p{6cm}|}
+\begin{tabular}{|l|r|c|c|}
 \hline
-\textbf{Feature} & \textbf{Signal} & \textbf{Ghi chú}\\
+\textbf{Feature} & \textbf{Chi$^2$} & \textbf{$p$-value} & \textbf{Pipeline (FE Cell 31)}\\
 \hline
-\texttt{num\_of\_prev\_attempts} & Mạnh    & Càng cao càng rủi ro Fail/Withdrawn\\
-\texttt{highest\_education}      & Trung bình & \textit{HE Qualification} pass cao nhất\\
-\texttt{imd\_band}               & Trung bình & Vùng 90--100\% pass vượt trội\\
+\texttt{code\_module}       & 1443,2 & $7{,}6\!\times\!10^{-296}$ & Giữ (categorical)\\
+\texttt{highest\_education} & 1024,7 & $9{,}2\!\times\!10^{-212}$ & Giữ (ordinal)\\
+\texttt{imd\_band}          & \phantom{0}666,9  & $3{,}2\!\times\!10^{-123}$ & Giữ (ordinal)\\
+\texttt{region}             & \phantom{0}449,7  & $6{,}5\!\times\!10^{-73}$  & Giữ (one-hot 12 vùng)\\
+\texttt{code\_presentation} & \phantom{0}402,2  & $4{,}7\!\times\!10^{-81}$  & Gộp \texttt{module\_semester}\\
+\texttt{age\_band}          & \phantom{0}222,7  & $2{,}8\!\times\!10^{-45}$  & Giữ (ordinal)\\
+\texttt{disability}         & \phantom{0}138,5  & $8{,}1\!\times\!10^{-30}$  & \textit{Drop}\\
+\texttt{gender}             & \phantom{00}16,5  & $8{,}8\!\times\!10^{-04}$  & \textit{Drop}\\
 \hline
 \end{tabular}
 \end{center}
 
-$\Rightarrow$ FE giữ 3 biến trên, \texttt{imd\_band} mã hoá ordinal.
+Với $n=32.593$, mọi $p$-value đều $<0{,}001$ nên label \textit{"Mạnh"}
+trong notebook không phân biệt được biến nào thực sự quan trọng. Dùng
+Chi$^2$ tuyệt đối để xếp hạng: \texttt{gender} thấp hơn biến đứng đầu
+gần 90 lần. Numeric features (\texttt{num\_of\_prev\_attempts},
+\texttt{studied\_credits}) được xét qua Spearman trong cùng cell và
+qua \texttt{mutual\_info\_classif} ở FE Cell~28 (vẫn được giữ
+nguyên). Quyết định cuối ở FE Cell~31: \texttt{redundant\_features}
+gồm \texttt{gender\_encoded} và \texttt{disability\_encoded} (Chi$^2$
+nhỏ nhất). Các biến giữ được encode theo \textbf{ordinal} (FE
+Cell~27): \texttt{No Formal qual}$\to 0$, \dots, \texttt{Post Graduate
+Qualification}$\to 4$; \texttt{0--10\%}$\to 0$, \dots,
+\texttt{90--100\%}$\to 9$, \texttt{Unknown}$\to 10$ — giữ quan hệ
+monotonic cho tree-based model.
 
 % ------------------------------------------------------------
 \subsection{Kiểm toán cấu trúc học phần và kỳ học}
