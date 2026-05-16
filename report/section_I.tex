@@ -1,164 +1,180 @@
 % ============================================================
-%  KHÁM PHÁ DỮ LIỆU (EDA) — gom toàn bộ bối cảnh + phân tích vào một chương
+%  KHÁM PHÁ DỮ LIỆU (EDA)
 % ============================================================
 \section{Khám phá dữ liệu (Exploratory Data Analysis)}
 
 % ------------------------------------------------------------
-\subsection{Tổng quan dataset và biến mục tiêu}
+\subsection{Tổng quan dataset và phân phối biến mục tiêu}
 
-OULAD gồm 7 bảng quan hệ; bài toán đặt ra là phân loại 4 nhãn
-\texttt{final\_result} của 32.593 sinh viên dựa trên dữ liệu trong
-$[0, 135]$ ngày đầu (cut-off $= 135$, xem mục 1.4).
+OULAD gồm 7 bảng quan hệ, phủ 32.593 lượt đăng ký học phần với
+10.655.280 lượt tương tác VLE. Bài toán phân loại 4 nhãn
+\texttt{final\_result} $\in$ \{Pass, Withdrawn, Fail, Distinction\}.
 
 \begin{center}
-\begin{tabular}{|l|r|p{6cm}|}
+\small
+\begin{tabular}{|l|r|l|}
 \hline
-\textbf{File} & \textbf{Số dòng} & \textbf{Mô tả}\\
+\textbf{File} & \textbf{Dòng} & \textbf{Cột có null (\%)} \\
 \hline
-\texttt{studentInfo.csv}         & 32.593      & Nhân khẩu học sinh viên\\
-\texttt{studentRegistration.csv} & 32.593      & Ngày đăng ký / rút môn\\
-\texttt{studentAssessment.csv}   & 173.912     & Điểm các bài đánh giá\\
-\texttt{studentVle.csv}          & 10.655.280  & Lượt click VLE theo ngày\\
-\texttt{assessments.csv}         & 206         & Loại bài, deadline, weight\\
-\texttt{courses.csv}             & 22          & Metadata module--presentation\\
-\texttt{vle.csv}                 & 6.364       & Metadata tài nguyên VLE\\
+\texttt{studentInfo}            & 32.593      & \texttt{imd\_band} 3,4\% \\
+\texttt{studentRegistration}    & 32.593      & \texttt{date\_unreg} 69,1\% \\
+\texttt{studentAssessment}      & 173.912     & \texttt{score} 0,1\% \\
+\texttt{studentVle}             & 10.655.280  & --- \\
+\texttt{assessments}            & 206         & \texttt{date} 5,3\% \\
+\texttt{courses}                & 22          & --- \\
+\texttt{vle}                    & 6.364       & \texttt{week\_from/to} 82,4\% \\
 \hline
 \end{tabular}
 \end{center}
 
 \begin{center}
+\small
 \begin{tabular}{|l|r|r|}
 \hline
-\textbf{Nhãn} & \textbf{Số lượng} & \textbf{Tỉ lệ}\\
+\textbf{Nhãn} & \textbf{Số lượng} & \textbf{Tỉ lệ} \\
 \hline
-Pass         & 12.361 & 37,93\%\\
-Withdrawn    & 10.156 & 31,16\%\\
-Fail         & 7.052  & 21,64\%\\
-Distinction  & 3.024  & \phantom{0}9,28\%\\
+Pass        & 12.361 & 37,93\% \\
+Withdrawn   & 10.156 & 31,16\% \\
+Fail        &  7.052 & 21,64\% \\
+Distinction &  3.024 & \phantom{0}9,28\% \\
 \hline
 \end{tabular}
 \end{center}
 
-Distinction chỉ $9,28\%$ $\Rightarrow$ chọn \textbf{Macro-F1} làm metric chính.
+Distinction chiếm $9,28\%$ — class nhỏ nhất, ít hơn Pass $\sim 4$ lần
+$\Rightarrow$ chọn \textbf{Macro-F1} làm metric chính để không bỏ qua
+class thiểu số.
 
 % ------------------------------------------------------------
-\subsection{Xử lý null và tín hiệu nhân khẩu học}
+\subsection{Phân tích null ngữ nghĩa và kiểm toán rò rỉ dữ liệu}
 
-Null mang ngữ nghĩa, không phải thiếu dữ liệu:
-\texttt{date\_unregistration} NULL nghĩa là sinh viên \textit{không rút
-môn} (giữ NULL); \texttt{score} NULL nghĩa là \textit{không nộp bài}
-$\Rightarrow$ \texttt{fillna(0)} — chính pattern này tự là tín hiệu
-phân biệt Withdrawn/Fail với Pass/Distinction.
+\subsubsection*{2.1\enspace Semantic Null — null không phải thiếu data}
 
-Notebook EDA (Section~10, Cell~24) chạy Chi-square cho 8 biến
-categorical và Spearman cho 5 biến numeric so với \texttt{final\_result}
-($n=32.593$), kết quả ở Figure~\ref{fig:stat-test}.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.95\linewidth]{figures/chi-square-spearman-eda-cell24.png}
-    \caption{Trái: Chi$^2$ của 8 biến categorical. Phải: Spearman corr giữa 5 biến numeric và \texttt{target\_encoded} (3=Distinction, 0=Withdrawn). Output gốc từ EDA Cell~24.}
-    \label{fig:stat-test}
-\end{figure}
-
-\textbf{Đọc figure}: với $n$ lớn mọi $p$-value đều $<0{,}001$ nên
-notebook gán nhãn \textit{"*** Mạnh"} cho cả 8 — không phân biệt được
-ai quan trọng. Xếp theo Chi$^2$ tuyệt đối: \texttt{gender} thấp hơn
-\texttt{code\_module} gần 90 lần. Spearman heatmap cho thấy 3 biến
-numeric có corr cao nhất với target là \texttt{avg\_score} (0,43),
-\texttt{active\_days} (0,42), \texttt{total\_clicks} (0,36); còn
-\texttt{studied\_credits} ($-0,12$) và \texttt{num\_of\_prev\_attempts}
-($-0,17$) yếu hơn nhưng vẫn có hướng monotonic.
-
-Quyết định ở FE Cell~31 (file \texttt{redundant\_features}): drop
-\texttt{gender\_encoded} và \texttt{disability\_encoded} — đúng 2 biến
-Chi$^2$ nhỏ nhất. 4 biến còn lại được giữ; \texttt{highest\_education}
-và \texttt{imd\_band} encode theo \textbf{ordinal} (FE Cell~27):
-\texttt{No Formal qual}$\to 0$, \dots, \texttt{Post Graduate
-Qualification}$\to 4$; \texttt{0--10\%}$\to 0$, \dots,
-\texttt{90--100\%}$\to 9$, \texttt{Unknown}$\to 10$ — giữ quan hệ
-monotonic cho tree-based model.
-
-% ------------------------------------------------------------
-\subsection{Kiểm toán cấu trúc học phần và kỳ học}
-
-\textbf{Insight}: trọng số và số lượng bài đánh giá giữa 7 module chênh
-lệch rất lớn $\Rightarrow$ \textbf{không thể so sánh raw score
-cross-module}. Bảng dưới trích 3 module đại diện cho 3 cực:
+Sai lầm phổ biến là fillna/drop tất cả null cơ học. Trong OULAD mỗi
+null đều mang ngữ nghĩa cụ thể:
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|p{4.2cm}|}
+\small
+\begin{tabular}{|l|r|p{3.6cm}|p{3.4cm}|}
 \hline
-\textbf{Module} & \textbf{CMA} & \textbf{Exam w.} & \textbf{TMA w.} & \textbf{Đặc điểm}\\
+\textbf{Cột} & \textbf{Null \%} & \textbf{Ý nghĩa thực} & \textbf{Quyết định} \\
 \hline
-AAA & 0  & 200 & 200 & Không có CMA\\
-FFF & 28 & 400 & 400 & Nhiều CMA nhất\\
-GGG & 18 & 300 & \textbf{0}   & TMA không tính điểm\\
+\texttt{date\_unregistration}   & 69,1\% & NULL = học đến hết module  & Giữ; \textbf{drop khỏi features} (leakage) \\
+\texttt{score}                  & 0,1\%  & Bài không nộp              & \texttt{fillna(0)} \\
+\texttt{imd\_band}              & 3,4\%  & Địa chỉ ngoài UK           & Encode \texttt{"Unknown"} \\
+\texttt{week\_from / week\_to}  & 82,4\% & Resource trải toàn module  & Drop cả 2 cột \\
 \hline
 \end{tabular}
 \end{center}
 
-Tương tự, hai đợt khai giảng chênh pass rate đáng kể: B (tháng 2)
-$43,67\%$, J (tháng 10) $49,40\%$ — chênh $\sim 6$pp và không đồng đều
-giữa modules.
+\texttt{date\_unregistration} có giá trị ở \textbf{99,1\%} ca Withdrawn
+$\Rightarrow$ proxy gần tuyệt đối của label, bắt buộc drop để tránh
+leakage 100\%. Ngược lại, NULL ở 69,1\% còn lại là tín hiệu
+\textit{positive} (sinh viên tiếp tục học).
 
-$\Rightarrow$ FE thêm \texttt{code\_module} categorical, dùng
-\texttt{weighted\_score} thay raw mean, cờ \texttt{has\_weighted\_score}
-cho GGG, và mã hoá \texttt{module\_semester} (interaction
-\texttt{code\_module $\times$ semester}).
+\subsubsection*{2.2\enspace Chọn cut-off theo data}
+
+Median module length 262 ngày. Phân tích phân phối ngày rút môn trên
+$n=10.156$ Withdrawn: day~135 ($51,6\%$ module) capture $\ge 80\%$
+Withdrawn và còn $\sim 48\%$ thời gian can thiệp; day~175 capture
+$\ge 90\%$ nhưng chỉ còn $33,1\%$ thời gian $\Rightarrow$ quá trễ.
+Chọn \textbf{CUTOFF\_DAY = 135} — cân bằng tối ưu giữa coverage và
+khả năng can thiệp.
+
+\subsubsection*{2.3\enspace Kiểm toán leakage tại cut-off 135}
+
+Toàn bộ 206 bài đánh giá phân loại SAFE (\texttt{deadline} $\le 135$)
+vs LEAKAGE (\texttt{deadline} $> 135$):
+
+\begin{center}
+\small
+\begin{tabular}{|l|r|r|r|p{3.4cm}|}
+\hline
+\textbf{Loại} & \textbf{SAFE} & \textbf{LEAK} & \textbf{Median submit ratio} & \textbf{Quyết định} \\
+\hline
+TMA  & \textbf{71} & 35 & 0,353 & \checkmark{} Dùng (đa số SAFE) \\
+CMA  & 17 & \textbf{59} & 0,577 & \checkmark{} Chuẩn hóa theo từng module \\
+Exam & 0  & \textbf{6}  & 0,927 & $\times$ Drop hoàn toàn \\
+\hline
+\end{tabular}
+\end{center}
+
+Median submit ratio Exam ($0{,}927$) $\Rightarrow$ bài thi luôn ở cuối
+kỳ, không có bài SAFE nào tại day~135, drop. CMA có 17/76 SAFE phân bố
+không đều giữa modules (AAA, EEE không có CMA) $\Rightarrow$ FE chuẩn
+hoá thành \texttt{cma\_submission\_rate}.
 
 % ------------------------------------------------------------
-\subsection{Pattern hành vi, chọn cut-off và rò rỉ dữ liệu}
+\subsection{Phân tích tín hiệu feature}
 
-\textbf{Điểm có trọng số} (Figure~\ref{fig:eda}, trái) là tín hiệu mạnh
-nhất tại cut-off 135: median Distinction $89,3$, Pass $76,7$, Fail
-$64,0$, Withdrawn $66,0$. Đáng chú ý median Withdrawn không thấp như
-kỳ vọng — \textit{nhiều sinh viên rút môn không phải vì điểm kém} (lý do
-cá nhân); IQR Withdrawn rộng (0--80) $\Rightarrow$ cần thêm tín hiệu
-hành vi để phân loại.
+\subsubsection*{3.1\enspace Tín hiệu nhân khẩu học}
 
-\textbf{Thời điểm rút môn} (Figure~\ref{fig:eda}, phải): trong $10.063$
-Withdrawn có \texttt{date\_unregistration}, \textbf{$\sim 50\%$ rút
-trong 30 ngày đầu} (phase A+B) — củng cố giá trị của các temporal
-features (clicks tuần đầu, vùng zero-click trước khi rút).
+Chi-square test ($n = 32.593$) trên các biến categorical so với nhãn
+\texttt{final\_result}:
 
-\begin{figure}[h]
-    \centering
-    \begin{minipage}[t]{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/boxplot-weighted-score-by-result.png}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/withdrawal-phases.png}
-    \end{minipage}
-    \caption{Trái: phân phối \texttt{weighted\_score} theo \texttt{final\_result}. Phải: thời điểm rút môn của Withdrawn theo 4 phase A/B/C/D.}
-    \label{fig:eda}
-\end{figure}
+\begin{center}
+\small
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Feature} & \textbf{$\chi^2$} & \textbf{Signal} \\
+\hline
+\texttt{code\_module}       & 1443,2 & \textbf{Rất mạnh} \\
+\texttt{highest\_education} & 1024,7 & \textbf{Rất mạnh} \\
+\texttt{imd\_band}          &  666,9 & \textbf{Rất mạnh} \\
+\texttt{region}             &  449,7 & Mạnh \\
+\texttt{age\_band}          &  222,7 & Mạnh \\
+\texttt{disability}         &  138,5 & Trung bình \\
+\texttt{gender}             &   16,5 & \textbf{Rất yếu} $\to$ drop \\
+\hline
+\end{tabular}
+\end{center}
 
-\textbf{Cut-off 135 ngày} chọn theo data-driven: median module length là
-$262$ ngày; day~135 ($51,6\%$ độ dài) là điểm nhỏ nhất capture $\ge 80\%$
-Withdrawn, vẫn còn $\sim 48\%$ thời gian can thiệp. Ba nguồn leakage
-phải loại:
+\texttt{gender} có $\chi^2$ thấp hơn \texttt{code\_module} gần
+\textbf{90 lần} $\Rightarrow$ drop. 4 biến mạnh được giữ và encode
+ordinal để bảo toàn quan hệ monotonic cho tree-based model.
 
-\begin{itemize}[leftmargin=*, itemsep=2pt]
-    \item \texttt{date\_unregistration} có giá trị trong $99,1\%$ ca
-    Withdrawn — proxy của label $\Rightarrow$ \textbf{drop}.
-    \item Exam ($6$ bài, deadline đều $>135$) tương quan $\sim 100\%$
-    với \texttt{final\_result} $\Rightarrow$ \textbf{không dùng}.
-    \item Mọi tương tác VLE/assessment có \texttt{date} sau cut-off
-    $\Rightarrow$ cắt; với CMA chỉ còn 17/76 bài \textit{safe}, FE
-    chuẩn hoá thành tỉ lệ (\texttt{cma\_submission\_rate}) thay vì
-    đếm tuyệt đối.
+\subsubsection*{3.2\enspace Hiệu ứng kỳ học (Semester B vs J)}
+
+Pass rate kỳ B (tháng 2) $= 43{,}67\%$ ($n=12.488$), kỳ J (tháng 10)
+$= 49{,}40\%$ ($n=20.105$). Chênh lệch không đồng đều theo module: CCC
+diff $= -6{,}38$ pp, EEE diff $= -6{,}28$ pp (vượt ngưỡng $\pm 5$ pp)
+$\Rightarrow$ semester \textbf{phải là feature}, không lọc bỏ.
+
+\subsubsection*{3.3\enspace Tín hiệu hành vi VLE}
+
+Phân tích 10.655.280 dòng \texttt{studentVle.csv} (log click của sinh
+viên trên hệ thống học trực tuyến) trong khoảng ngày $[{-}\infty,\,
+135]$ phát hiện 3 pattern chính:
+
+\begin{itemize}\setlength\itemsep{0pt}
+    \item \textbf{Pre-course} (click trước ngày khai giảng, \texttt{date} $<0$):
+          tương quan Spearman với nhãn rất rõ —
+          $\rho_{\text{pre\_clicks}} = +0{,}2684$,
+          $\rho_{\text{pre\_days}} = +0{,}2471$ ($p \approx 0$).
+          $\Rightarrow$ sinh viên \textit{xem trước tài liệu} đã là tín
+          hiệu cảnh báo sớm.
+
+    \item \textbf{Activity ratio} (tỉ lệ click Distinction / Withdrawn
+          theo loại tài nguyên): forum $4{,}65\times$, nội dung học
+          $4{,}09\times$, quiz $1{,}44\times$. $\Rightarrow$ Withdrawn
+          gần như \textit{không vào forum}, khác biệt mạnh nhất ở
+          forum và nội dung.
+
+    \item \textbf{Temporal} (phân phối click theo thời gian): Withdrawn
+          có peak sớm (ngày 0--30) rồi biến mất; Pass/Distinction click
+          đều đặn đến cuối. $\Rightarrow$ tổng click (\texttt{sum\_click})
+          kém phân biệt; FE cần các feature thời gian: số ngày active,
+          ngày active cuối, số tuần liên tiếp không hoạt động, số click
+          trung bình mỗi tuần.
 \end{itemize}
 
 % ------------------------------------------------------------
-\subsection{Kết luận EDA}
+\subsection*{Kết luận EDA}
 
-EDA xác định 4 nhóm tín hiệu khả dụng tại cut-off 135 ngày:
-(i)~nhân khẩu (3 biến), (ii)~điểm có trọng số trước cut-off,
-(iii)~hành vi VLE theo thời gian, (iv)~hành vi nộp bài. Chương sau xây
-dựng feature engineering bám sát 4 nhóm này, loại bỏ leakage và chuẩn
-hoá theo module.
+EDA xác định 4 nhóm tín hiệu khả dụng tại cut-off 135: (i)~nhân khẩu
+học (4 biến sau chi-square), (ii)~điểm có trọng số trước cut-off
+(TMA SAFE 71/106), (iii)~hành vi VLE theo thời gian (temporal,
+không dùng sum\_click tổng), (iv)~hành vi nộp bài (submission rate,
+deadline gap).
 
 \newpage
