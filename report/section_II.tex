@@ -1,181 +1,154 @@
 % ============================================================
-%  CHƯƠNG II — KHÁM PHÁ DỮ LIỆU (EDA)
+%  KHÁM PHÁ DỮ LIỆU (EDA) — gom toàn bộ bối cảnh + phân tích vào một chương
 % ============================================================
 \section{Khám phá dữ liệu (Exploratory Data Analysis)}
 
-EDA là bước nền tảng quyết định mọi lựa chọn feature engineering ở giai
-đoạn sau. Mục tiêu phần này gồm 3 trục: (1) hiểu cấu trúc và ngữ nghĩa
-của null, (2) xác định tín hiệu mạnh trong các nhóm feature, (3) phát
-hiện các \textit{leakage} tiềm tàng.
-
 % ------------------------------------------------------------
-\subsection{Phân tích Null theo ngữ nghĩa (Semantic Null)}
+\subsection{Tổng quan dataset và biến mục tiêu}
 
-Quan trọng nhất: \textbf{null không phải lúc nào cũng là “thiếu dữ
-liệu”}. Nhiều cột null mang ý nghĩa cụ thể và phải xử lý đúng để giữ
-được tín hiệu.
+OULAD gồm 7 bảng quan hệ; bài toán đặt ra là phân loại 4 nhãn
+\texttt{final\_result} của 32.593 sinh viên dựa trên dữ liệu trong
+$[0, 135]$ ngày đầu (cut-off $= 135$, xem mục 1.4).
 
 \begin{center}
-\begin{tabular}{|p{5.5cm}|p{4.5cm}|p{4cm}|}
+\begin{tabular}{|l|r|p{6cm}|}
 \hline
-\textbf{Cột} & \textbf{Ý nghĩa thực} & \textbf{Cách xử lý}\\
+\textbf{File} & \textbf{Số dòng} & \textbf{Mô tả}\\
 \hline
-\texttt{date\_unregistration} NULL  & Sinh viên không rút môn         & Giữ NULL, không dropna()\\
-\texttt{date\_unregistration} có giá trị & Sinh viên đã rút môn       & Giữ nguyên (nhưng có risk leakage)\\
-\texttt{score} NULL                 & Sinh viên không nộp bài         & \texttt{fillna(0)}\\
-\texttt{imd\_band} NULL             & Không map được vào vùng UK      & Encode "Unknown"\\
-\texttt{week\_from}, \texttt{week\_to} NULL & Tài nguyên không gắn tuần & Drop 2 cột\\
-\texttt{date} (assessments) NULL    & Không biết deadline             & Drop khi join\\
+\texttt{studentInfo.csv}         & 32.593      & Nhân khẩu học sinh viên\\
+\texttt{studentRegistration.csv} & 32.593      & Ngày đăng ký / rút môn\\
+\texttt{studentAssessment.csv}   & 173.912     & Điểm các bài đánh giá\\
+\texttt{studentVle.csv}          & 10.655.280  & Lượt click VLE theo ngày\\
+\texttt{assessments.csv}         & 206         & Loại bài, deadline, weight\\
+\texttt{courses.csv}             & 22          & Metadata module--presentation\\
+\texttt{vle.csv}                 & 6.364       & Metadata tài nguyên VLE\\
 \hline
 \end{tabular}
 \end{center}
-
-\textbf{Pattern null score theo} \texttt{final\_result}:
-
-\begin{itemize}[leftmargin=*]
-    \item Withdrawn: $\approx 0.40\%$ null score — cao nhất.
-    \item Fail: $\approx 0.25\%$.
-    \item Pass: $\approx 0.03\%$.
-    \item Distinction: $0.0\%$.
-\end{itemize}
-
-$\Rightarrow$ \texttt{fillna(0)} là semantically correct: không nộp bài
-$=$ điểm 0, và chính pattern này giúp model học signal phân biệt
-Withdrawn / Fail vs Pass / Distinction.
-
-% ------------------------------------------------------------
-\subsection{Biến mục tiêu (Target Variable)}
-
-\subsubsection{Phân phối nhãn}
 
 \begin{center}
 \begin{tabular}{|l|r|r|}
 \hline
 \textbf{Nhãn} & \textbf{Số lượng} & \textbf{Tỉ lệ}\\
 \hline
-Pass         & 12.361 & 37,9\%\\
-Withdrawn    & 10.156 & 31,2\%\\
-Fail         & 7.052  & 21,6\%\\
-Distinction  & 3.024  &  9,3\%\\
+Pass         & 12.361 & 37,93\%\\
+Withdrawn    & 10.156 & 31,16\%\\
+Fail         & 7.052  & 21,64\%\\
+Distinction  & 3.024  & \phantom{0}9,28\%\\
 \hline
 \end{tabular}
 \end{center}
 
-$\Rightarrow$ Class imbalance — Distinction chỉ chiếm $9,3\%$. Cần áp
-dụng \textit{stratified split} và \texttt{class\_weight} khi huấn luyện
-mô hình.
-
-\subsubsection{Tín hiệu từ nhóm nhân khẩu học (Demographics)}
-
-\begin{center}
-\begin{tabular}{|l|c|p{5.5cm}|}
-\hline
-\textbf{Feature} & \textbf{Tín hiệu} & \textbf{Ghi chú}\\
-\hline
-\texttt{num\_of\_prev\_attempts} & Mạnh    & Càng cao càng rủi ro\\
-\texttt{highest\_education}      & Trung bình & HE Qualification pass cao nhất\\
-\texttt{imd\_band}               & Trung bình & 90--100\% pass tốt hơn rõ rệt\\
-\texttt{age\_band}               & Trung bình & 0--35 Withdrawn nhiều nhất\\
-\texttt{studied\_credits}        & Yếu     & Overlap lớn giữa 4 nhóm\\
-\texttt{gender}                  & Rất yếu & Gần như không phân biệt M/F\\
-\hline
-\end{tabular}
-\end{center}
-
-\textit{Lưu ý}: \texttt{studied\_credits} là số tín chỉ đăng ký, KHÔNG
-phải điểm số.
+Distinction chỉ $9,28\%$ $\Rightarrow$ dùng \textit{stratified split} và
+chọn \textbf{Macro-F1} làm metric chính.
 
 % ------------------------------------------------------------
-\subsection{Kiểm tra cấu trúc Module (Module Structure Audit)}
+\subsection{Xử lý null và tín hiệu nhân khẩu học}
 
-\textbf{Insight cốt lõi}: cấu trúc đánh giá giữa các module khác nhau
-hoàn toàn. Không thể so sánh raw score cross-module.
+Null mang ngữ nghĩa, không phải thiếu dữ liệu:
+\texttt{date\_unregistration} NULL nghĩa là sinh viên \textit{không rút
+môn} (giữ NULL); \texttt{score} NULL nghĩa là \textit{không nộp bài}
+$\Rightarrow$ \texttt{fillna(0)} — chính pattern này tự là tín hiệu
+phân biệt Withdrawn/Fail với Pass/Distinction.
+
+Chi-square trên 8 biến categorical trong \texttt{studentInfo} chỉ có
+3 biến có signal đáng kể; \texttt{gender}, \texttt{disability},
+\texttt{studied\_credits} signal rất yếu nên bị loại.
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|p{3cm}|}
+\begin{tabular}{|l|c|p{6cm}|}
 \hline
-\textbf{Module} & \textbf{CMA} & \textbf{Exam weight} & \textbf{TMA weight} & \textbf{Đặc điểm}\\
+\textbf{Feature} & \textbf{Signal} & \textbf{Ghi chú}\\
+\hline
+\texttt{num\_of\_prev\_attempts} & Mạnh    & Càng cao càng rủi ro Fail/Withdrawn\\
+\texttt{highest\_education}      & Trung bình & \textit{HE Qualification} pass cao nhất\\
+\texttt{imd\_band}               & Trung bình & Vùng 90--100\% pass vượt trội\\
+\hline
+\end{tabular}
+\end{center}
+
+$\Rightarrow$ FE giữ 3 biến trên, \texttt{imd\_band} mã hoá ordinal.
+
+% ------------------------------------------------------------
+\subsection{Kiểm toán cấu trúc học phần và kỳ học}
+
+\textbf{Insight}: trọng số và số lượng bài đánh giá giữa 7 module chênh
+lệch rất lớn $\Rightarrow$ \textbf{không thể so sánh raw score
+cross-module}. Bảng dưới trích 3 module đại diện cho 3 cực:
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|p{4.2cm}|}
+\hline
+\textbf{Module} & \textbf{CMA} & \textbf{Exam w.} & \textbf{TMA w.} & \textbf{Đặc điểm}\\
 \hline
 AAA & 0  & 200 & 200 & Không có CMA\\
-BBB & 15 & 400 & 385 & Nặng TMA\\
-CCC & 8  & 400 & 150 & CMA tỉ lệ đáng kể\\
-DDD & 7  & 400 & 375 & Nặng TMA\\
-EEE & 0  & 300 & 300 & Không có CMA\\
-FFF & 28 & 400 & 400 & CMA nhiều nhất\\
-GGG & 18 & 300 & \textbf{0} & TMA không tính điểm\\
+FFF & 28 & 400 & 400 & Nhiều CMA nhất\\
+GGG & 18 & 300 & \textbf{0}   & TMA không tính điểm\\
 \hline
 \end{tabular}
 \end{center}
 
-\textbf{Hệ quả thiết kế feature}:
+Tương tự, hai đợt khai giảng chênh pass rate đáng kể: B (tháng 2)
+$43,67\%$, J (tháng 10) $49,40\%$ — chênh $\sim 6$pp và không đồng đều
+giữa modules.
 
-\begin{enumerate}[leftmargin=*]
-    \item Thêm \texttt{code\_module} làm categorical feature để mô hình
-    tự học distribution shift theo module.
-    \item Dùng \texttt{weighted\_score} thay vì \texttt{mean(score)}.
-    \item Chuẩn hóa submission rate:
-    $\dfrac{n\_submitted}{n\_safe\_available\_in\_module}$ thay vì đếm
-    tuyệt đối.
-    \item Riêng module \textbf{GGG} (TMA weight $= 0$): thêm cờ\\
-    \texttt{has\_weighted\_score = 0} để model phân biệt.
-\end{enumerate}
+$\Rightarrow$ FE thêm \texttt{code\_module} categorical, dùng
+\texttt{weighted\_score} thay raw mean, cờ \texttt{has\_weighted\_score}
+cho GGG, và mã hoá \texttt{module\_semester} (interaction
+\texttt{code\_module $\times$ semester}).
 
 % ------------------------------------------------------------
-\subsection{Hiệu ứng Presentation (B vs J)}
+\subsection{Pattern hành vi, chọn cut-off và rò rỉ dữ liệu}
 
-So sánh hai đợt khai giảng (B = February, J = October):
+\textbf{Điểm có trọng số} (Figure~\ref{fig:eda}, trái) là tín hiệu mạnh
+nhất tại cut-off 135: median Distinction $89,3$, Pass $76,7$, Fail
+$64,0$, Withdrawn $66,0$. Đáng chú ý median Withdrawn không thấp như
+kỳ vọng — \textit{nhiều sinh viên rút môn không phải vì điểm kém} (lý do
+cá nhân); IQR Withdrawn rộng (0--80) $\Rightarrow$ cần thêm tín hiệu
+hành vi để phân loại.
 
-\begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Đợt} & \textbf{Pass rate} & \textbf{$n\_students$}\\
-\hline
-B (Feb) & 43,67\% & 12.488\\
-J (Oct) & — / TODO & — / TODO\\
-\hline
-\end{tabular}
-\end{center}
+\textbf{Thời điểm rút môn} (Figure~\ref{fig:eda}, phải): trong $10.063$
+Withdrawn có \texttt{date\_unregistration}, \textbf{$\sim 50\%$ rút
+trong 30 ngày đầu} (phase A+B) — củng cố giá trị của các temporal
+features (clicks tuần đầu, vùng zero-click trước khi rút).
 
-$\Rightarrow$ Tính năng \texttt{module\_semester} (ghép\\
-\texttt{code\_module \_ code\_presentation}) chứa tín hiệu hữu ích — sẽ
-được mã hóa qua Label Encoding ở phần feature engineering.
+\begin{figure}[h]
+    \centering
+    \begin{minipage}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/boxplot-weighted-score-by-result.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/withdrawal-phases.png}
+    \end{minipage}
+    \caption{Trái: phân phối \texttt{weighted\_score} theo \texttt{final\_result}. Phải: thời điểm rút môn của Withdrawn theo 4 phase A/B/C/D.}
+    \label{fig:eda}
+\end{figure}
 
-% ------------------------------------------------------------
-\subsection{Phân tích Leakage}
+\textbf{Cut-off 135 ngày} chọn theo data-driven: median module length là
+$262$ ngày; day~135 ($51,6\%$ độ dài) là điểm nhỏ nhất capture $\ge 80\%$
+Withdrawn, vẫn còn $\sim 48\%$ thời gian can thiệp. Ba nguồn leakage
+phải loại:
 
-Các nguồn rò rỉ dữ liệu cần loại bỏ trước khi xây feature:
-
-\begin{itemize}[leftmargin=*]
-    \item \texttt{date\_unregistration}: biết được sinh viên đã
-    Withdrawn $\Rightarrow$ \textbf{drop}.
-    \item Bài thi cuối kỳ (Exam) có deadline $> 135$ nhưng correlate
-    100\% với final\_result $\Rightarrow$ \textbf{lọc bỏ} khi tính
-    feature.
-    \item Mọi tương tác VLE với \texttt{date $>$ 135} $\Rightarrow$
-    cắt theo \texttt{CUTOFF\_DAY}.
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+    \item \texttt{date\_unregistration} có giá trị trong $99,1\%$ ca
+    Withdrawn — proxy của label $\Rightarrow$ \textbf{drop}.
+    \item Exam ($6$ bài, deadline đều $>135$) tương quan $\sim 100\%$
+    với \texttt{final\_result} $\Rightarrow$ \textbf{không dùng}.
+    \item Mọi tương tác VLE/assessment có \texttt{date} sau cut-off
+    $\Rightarrow$ cắt; với CMA chỉ còn 17/76 bài \textit{safe}, FE
+    chuẩn hoá thành tỉ lệ (\texttt{cma\_submission\_rate}) thay vì
+    đếm tuyệt đối.
 \end{itemize}
 
 % ------------------------------------------------------------
-\subsection{Tổng kết EDA}
+\subsection{Kết luận EDA}
 
-\begin{itemize}[leftmargin=*]
-    \item Null cần được xử lý theo \textbf{ngữ nghĩa}, không phải mặc
-    định \texttt{dropna()} hay \texttt{mean imputation}.
-    \item Class imbalance nghiêng về Pass, Distinction là lớp thiểu
-    số $\Rightarrow$ cần stratified split và metric Macro-F1.
-    \item Cấu trúc đánh giá khác nhau giữa các module $\Rightarrow$
-    feature phải được chuẩn hóa relative (rate) thay vì absolute
-    (count).
-    \item Hai nguồn leakage chính: \texttt{date\_unregistration} và
-    bài thi cuối kỳ $\Rightarrow$ phải loại bỏ trước khi train.
-\end{itemize}
-
-\textbf{Câu hỏi mở}:
-
-\begin{itemize}[leftmargin=*]
-    \item Có nên tách model riêng cho từng nhóm module (AAA/EEE vs
-    GGG vs còn lại) thay vì để \texttt{code\_module} dạng categorical?
-    \item Pass rate đợt J cụ thể bao nhiêu — cần bổ sung từ notebook.
-\end{itemize}
+EDA xác định 4 nhóm tín hiệu khả dụng tại cut-off 135 ngày:
+(i)~nhân khẩu (3 biến), (ii)~điểm có trọng số trước cut-off,
+(iii)~hành vi VLE theo thời gian, (iv)~hành vi nộp bài. Chương sau xây
+dựng feature engineering bám sát 4 nhóm này, loại bỏ leakage và chuẩn
+hoá theo module.
 
 \newpage
