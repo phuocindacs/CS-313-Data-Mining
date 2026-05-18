@@ -14,7 +14,16 @@
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{scrextend}
-\changefontsizes{14pt}
+\changefontsizes{13pt} % Normal text size 13
+\usepackage{mathptmx} % Font Times New Roman
+\usepackage{titlesec}
+
+\renewcommand{\thesection}{\Roman{section}} % Change section numbering to Roman
+
+\titleformat{\section}[block]{\fontsize{16pt}{19.2pt}\bfseries\centering}{\thesection}{1em}{} % Heading 1 (Chương): Cỡ chữ 16, Căn giữa
+\titleformat{\subsection}[block]{\fontsize{15pt}{18pt}\bfseries}{\thesubsection}{1em}{} % Heading 2 (Đề mục): Cỡ chữ 15
+\titleformat{\subsubsection}[block]{\fontsize{14pt}{16.8pt}\bfseries}{\thesubsubsection}{1em}{} % Heading 3 (Tiểu mục): Cỡ chữ 14
+
 \usetikzlibrary{calc}
 \usepackage{indentfirst}
 \usepackage{enumitem}
@@ -65,18 +74,18 @@
      ([yshift=-0.3cm,xshift=0.3cm]A);
 \end{tikzpicture}
 
+\vspace*{-20pt}
 \begin{center}
     \fontsize{13pt}{17pt}\selectfont
     \textbf{ĐẠI HỌC QUỐC GIA TP. HỒ CHÍ MINH}
-    \vspace{10pt}\\
+    \vspace{7pt}\\
     \textbf{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN}
 \end{center}
-\vspace{10pt}
+% \vspace{10pt}
 \begin{center}
-    % Đặt logo UIT vào figures/UIT_Logo.jpg (xem report/README.md)
-    % \includegraphics[scale=0.5]{figures/UIT_Logo.jpg}
+    \includegraphics[scale=0.2]{figures/UIT_Logo.jpg}
 
-    \vspace{20pt}
+    \vspace{10pt}
     \fontsize{16pt}{17pt}\selectfont
     \textbf{BÁO CÁO ĐỒ ÁN CUỐI KỲ}
     \vspace{6pt}\\
@@ -86,29 +95,27 @@
 
 \vspace{5pt}
 \begin{center}
-    \hrulefill \\
     \vspace{10pt}
     \fontsize{17pt}{20pt}\selectfont
-    \textbf{HỆ THỐNG CẢNH BÁO SỚM\\ KẾT QUẢ HỌC TẬP SINH VIÊN\\ TRÊN BỘ DỮ LIỆU OULAD}
-    \vspace{6pt}\\
-    \hrulefill
+    \textbf{HỆ THỐNG CẢNH BÁO SỚM\\KẾT QUẢ HỌC TẬP SINH VIÊN\\TRÊN BỘ DỮ LIỆU OULAD}
 \end{center}
 
-\vspace{30pt}
+\vspace{20pt}
 \begin{adjustwidth}{3cm}{0cm}
-    \fontsize{14pt}{17pt}\selectfont
-    \textbf{Giảng viên hướng dẫn:} \\
-    \hspace*{1cm}Võ Nguyễn Lê Duy
+    \fontsize{13pt}{17pt}\selectfont
+    \textbf{Giảng viên hướng dẫn:} \\[5pt]
+    \hspace*{1cm}TS. Võ Nguyễn Lê Duy
 \end{adjustwidth}
 
 \vspace{10pt}
 \begin{adjustwidth}{3cm}{0cm}
-    \fontsize{14pt}{17pt}\selectfont
+    \fontsize{13pt}{17pt}\selectfont
     \textbf{Nhóm 11:}
 \end{adjustwidth}
 
 \begin{center}
-\fontsize{14pt}{17pt}\selectfont
+\fontsize{13pt}{17pt}\selectfont
+\renewcommand{\arraystretch}{1.5}
 \begin{tabular}{|c|c|}
 \hline
 \textbf{Họ tên} & \textbf{MSSV}\\
@@ -126,7 +133,7 @@ Lê Như Thực & 24521747\\
 \end{tabular}
 \end{center}
 
-\vspace{40pt}
+\vspace{5pt}
 \begin{center}
     \fontsize{14pt}{17pt}\selectfont
     \textbf{Thành phố Hồ Chí Minh, Tháng 5/2026}
@@ -136,9 +143,11 @@ Lê Như Thực & 24521747\\
 % ============================================================
 %  MỤC LỤC
 % ============================================================
+\pagenumbering{gobble}
 \tableofcontents
 \newpage
 
+\pagenumbering{arabic}
 \input{section_I.tex}
 
 \nocite{*}
