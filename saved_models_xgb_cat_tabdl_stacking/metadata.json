@@ -1,0 +1,129 @@
+{
+  "version": "xgb_cat_tabdl_stacking_binary_v1",
+  "primary_metric": "f1_binary",
+  "n_features": 32,
+  "feature_cols": [
+    "num_of_prev_attempts",
+    "studied_credits",
+    "has_pre_course_activity",
+    "active_rate",
+    "clicks_per_active_day",
+    "mean_score",
+    "weighted_score_before_cutoff",
+    "has_weighted_score",
+    "cma_submission_rate",
+    "tma_submission_rate",
+    "avg_days_before_deadline",
+    "click_slope_r2",
+    "activity_density",
+    "gap_trend",
+    "weekend_click_ratio",
+    "highest_education_encoded",
+    "age_band_encoded",
+    "imd_band_encoded",
+    "semester_enc",
+    "module_semester_encoded",
+    "region_East Midlands Region",
+    "region_Ireland",
+    "region_London Region",
+    "region_North Region",
+    "region_North Western Region",
+    "region_Scotland",
+    "region_South East Region",
+    "region_South Region",
+    "region_South West Region",
+    "region_Wales",
+    "region_West Midlands Region",
+    "region_Yorkshire Region"
+  ],
+  "models": [
+    "XGBoost",
+    "CatBoost",
+    "TabularDL(MLP)"
+  ],
+  "stacking": {
+    "n_folds": 5,
+    "meta_learner": "LogisticRegression",
+    "meta_feature_dim": 6,
+    "anti_leakage": "OOF predictions via TimeSeriesSplit"
+  },
+  "results": [
+    {
+      "name": "XGBoost",
+      "accuracy": 0.8587033747779751,
+      "precision": 0.9040675364543361,
+      "recall": 0.8119937963122523,
+      "f1_binary": 0.8555605991829324,
+      "auc_roc": 0.9267128990644542
+    },
+    {
+      "name": "CatBoost",
+      "accuracy": 0.8632326820603907,
+      "precision": 0.9093527943153448,
+      "recall": 0.8159572634844047,
+      "f1_binary": 0.860127157129882,
+      "auc_roc": 0.9340069184387734
+    },
+    {
+      "name": "Tabular DL (MLP)",
+      "accuracy": 0.8626110124333926,
+      "precision": 0.9143302180685359,
+      "recall": 0.8092366017577115,
+      "f1_binary": 0.8585793948258524,
+      "auc_roc": 0.9311594405413768
+    },
+    {
+      "name": "Stacking (OOF + LogisticRegression)",
+      "accuracy": 0.8603907637655417,
+      "precision": 0.9013469929804591,
+      "recall": 0.8187144580389454,
+      "f1_binary": 0.8580458732165432,
+      "auc_roc": 0.9311319986998441
+    },
+    {
+      "name": "Soft Voting (Equal: XGB+Cat+TabDL)",
+      "accuracy": 0.8603907637655417,
+      "precision": 0.9051905765179085,
+      "recall": 0.8144063415474755,
+      "f1_binary": 0.8574020319303338,
+      "auc_roc": 0.9305731830177253
+    }
+  ],
+  "best": {
+    "name": "CatBoost",
+    "accuracy": 0.8632326820603907,
+    "precision": 0.9093527943153448,
+    "recall": 0.8159572634844047,
+    "f1_binary": 0.860127157129882,
+    "auc_roc": 0.9340069184387734
+  },
+  "best_params": {
+    "xgb": {
+      "n_estimators": 618,
+      "max_depth": 3,
+      "learning_rate": 0.2945600531058432,
+      "subsample": 0.792729729389119,
+      "colsample_bytree": 0.8184602638192591,
+      "min_child_weight": 4,
+      "gamma": 0.04453337135857047,
+      "reg_alpha": 0.11202599222994657,
+      "reg_lambda": 1.1948643404356346e-05
+    },
+    "cat": {
+      "iterations": 338,
+      "learning_rate": 0.010089539461054332,
+      "depth": 10,
+      "l2_leaf_reg": 0.010464017148380966,
+      "random_strength": 0.06801383696861585,
+      "bagging_temperature": 0.041611637901407095
+    },
+    "tabdl": {
+      "hidden_dim": 286,
+      "num_layers": 1,
+      "dropout": 0.3764416068585158,
+      "batch_size": 128,
+      "lr": 0.0006689782455477374,
+      "weight_decay": 6.783777437049657e-05
+    }
+  }
+}
