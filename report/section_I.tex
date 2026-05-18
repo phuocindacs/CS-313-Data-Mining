@@ -59,7 +59,7 @@ null đều mang ngữ nghĩa cụ thể:
 \hline
 \textbf{Cột} & \textbf{Null \%} & \textbf{Ý nghĩa thực} & \textbf{Quyết định} \\
 \hline
-\texttt{date\_unregistration}   & 69,1\% & NULL = học đến hết module  & Giữ; \textbf{drop khỏi features} (leakage) \\
+\texttt{date\_unregistration}   & 69,1\% & NULL = học đến hết module  & \textbf{Drop} (leakage 99,1\% Withdrawn) \\
 \texttt{score}                  & 0,1\%  & Bài không nộp              & \texttt{fillna(0)} \\
 \texttt{imd\_band}              & 3,4\%  & Địa chỉ ngoài UK           & Encode \texttt{"Unknown"} \\
 \texttt{week\_from / week\_to}  & 82,4\% & Resource trải toàn module  & Drop cả 2 cột \\
@@ -78,8 +78,11 @@ Median module length 262 ngày. Phân tích phân phối ngày rút môn trên
 $n=10.156$ Withdrawn: day~135 ($51,6\%$ module) capture $\ge 80\%$
 Withdrawn và còn $\sim 48\%$ thời gian can thiệp; day~175 capture
 $\ge 90\%$ nhưng chỉ còn $33,1\%$ thời gian $\Rightarrow$ quá trễ.
-Chọn \textbf{CUTOFF\_DAY = 135} — cân bằng tối ưu giữa coverage và
-khả năng can thiệp.
+Vì pipeline đánh giá trên nhiều mốc cảnh báo, chọn:
+\textbf{cut-off giữa kỳ = 135} (mốc chính, tối ưu coverage vs khả
+năng can thiệp); \textbf{cut-off cuối kỳ = \{30, 60, 90, 135\}} để
+theo dõi cách tín hiệu tích luỹ theo thời gian khi đánh giá lại ở
+cuối module.
 
 \subsubsection*{2.3\enspace Kiểm toán leakage tại cut-off 135}
 
@@ -92,9 +95,9 @@ vs LEAKAGE (\texttt{deadline} $> 135$):
 \hline
 \textbf{Loại} & \textbf{SAFE} & \textbf{LEAK} & \textbf{Median submit ratio} & \textbf{Quyết định} \\
 \hline
-TMA  & \textbf{71} & 35 & 0,353 & \checkmark{} Dùng (đa số SAFE) \\
-CMA  & 17 & \textbf{59} & 0,577 & \checkmark{} Chuẩn hóa theo từng module \\
-Exam & 0  & \textbf{6}  & 0,927 & $\times$ Drop hoàn toàn \\
+TMA  & \textbf{71} & 35 & 0,353 & Dùng (đa số SAFE) \\
+CMA  & 17 & \textbf{59} & 0,577 & Chuẩn hóa theo từng module \\
+Exam & 0  & \textbf{6}  & 0,927 & Drop hoàn toàn \\
 \hline
 \end{tabular}
 \end{center}
@@ -140,41 +143,14 @@ $= 49{,}40\%$ ($n=20.105$). Chênh lệch không đồng đều theo module: CCC
 diff $= -6{,}38$ pp, EEE diff $= -6{,}28$ pp (vượt ngưỡng $\pm 5$ pp)
 $\Rightarrow$ semester \textbf{phải là feature}, không lọc bỏ.
 
-\subsubsection*{3.3\enspace Tín hiệu hành vi VLE}
-
-Phân tích 10.655.280 dòng \texttt{studentVle.csv} (log click của sinh
-viên trên hệ thống học trực tuyến) trong khoảng ngày $[{-}\infty,\,
-135]$ phát hiện 3 pattern chính:
-
-\begin{itemize}\setlength\itemsep{0pt}
-    \item \textbf{Pre-course} (click trước ngày khai giảng, \texttt{date} $<0$):
-          tương quan Spearman với nhãn rất rõ —
-          $\rho_{\text{pre\_clicks}} = +0{,}2684$,
-          $\rho_{\text{pre\_days}} = +0{,}2471$ ($p \approx 0$).
-          $\Rightarrow$ sinh viên \textit{xem trước tài liệu} đã là tín
-          hiệu cảnh báo sớm.
-
-    \item \textbf{Activity ratio} (tỉ lệ click Distinction / Withdrawn
-          theo loại tài nguyên): forum $4{,}65\times$, nội dung học
-          $4{,}09\times$, quiz $1{,}44\times$. $\Rightarrow$ Withdrawn
-          gần như \textit{không vào forum}, khác biệt mạnh nhất ở
-          forum và nội dung.
-
-    \item \textbf{Temporal} (phân phối click theo thời gian): Withdrawn
-          có peak sớm (ngày 0--30) rồi biến mất; Pass/Distinction click
-          đều đặn đến cuối. $\Rightarrow$ tổng click (\texttt{sum\_click})
-          kém phân biệt; FE cần các feature thời gian: số ngày active,
-          ngày active cuối, số tuần liên tiếp không hoạt động, số click
-          trung bình mỗi tuần.
-\end{itemize}
-
 % ------------------------------------------------------------
 \subsection*{Kết luận EDA}
 
-EDA xác định 4 nhóm tín hiệu khả dụng tại cut-off 135: (i)~nhân khẩu
-học (4 biến sau chi-square), (ii)~điểm có trọng số trước cut-off
-(TMA SAFE 71/106), (iii)~hành vi VLE theo thời gian (temporal,
-không dùng sum\_click tổng), (iv)~hành vi nộp bài (submission rate,
-deadline gap).
+EDA xác định các nhóm tín hiệu khả dụng tại cut-off 135: (i)~nhân
+khẩu học (4 biến sau chi-square), (ii)~điểm có trọng số trước
+cut-off (TMA SAFE 71/106), (iii)~hành vi nộp bài (submission rate,
+deadline gap). Tín hiệu hành vi VLE sẽ phân tích chi tiết ở giai
+đoạn Feature Engineering sau khi thống nhất pipeline nhị phân
+(At-Risk vs Not At-Risk).
 
 \newpage
