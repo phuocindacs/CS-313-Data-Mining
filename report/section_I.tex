@@ -10,7 +10,8 @@ OULAD là bộ dữ liệu học tập liên kết gồm 7 bảng quan hệ, bao
 
 \begin{center}
 \small
-\begin{tabular}{|l|r|l|}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|}
 \hline
 \textbf{File} & \textbf{Dòng} & \textbf{Cột có null (\%)} \\
 \hline
@@ -27,6 +28,7 @@ OULAD là bộ dữ liệu học tập liên kết gồm 7 bảng quan hệ, bao
 
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|r|r|}
 \hline
 \textbf{Nhãn} & \textbf{Số lượng} & \textbf{Tỉ lệ} \\
@@ -41,8 +43,8 @@ Distinction &  3.024 & \phantom{0}9,28\% \\
 
 Trong phạm vi đồ án này, nhóm thực hiện chuyển đổi bài toán về dạng \textbf{phân loại nhị phân} bằng cách gộp các nhãn mục tiêu ban đầu thành hai nhóm chính:
 \begin{itemize}
-    \item \textbf{Safe}: Gồm các sinh viên đạt kết quả \textit{Pass} hoặc \textit{Distinction} (nhóm sinh viên an toàn).
-    \item \textbf{Not Safe}: Gồm các sinh viên rơi vào trạng thái \textit{Fail} hoặc \textit{Withdrawn} (nhóm sinh viên gặp rủi ro học tập).
+    \item \textbf{Safe}: Gồm các người học đạt kết quả \textit{Pass} hoặc \textit{Distinction} (nhóm người học an toàn).
+    \item \textbf{Not Safe}: Gồm các người học rơi vào trạng thái \textit{Fail} hoặc \textit{Withdrawn} (nhóm người học gặp rủi ro học tập).
 \end{itemize}
 
 Sau khi chuyển đổi, tỷ lệ giữa nhóm Safe ($\sim 47,2\%$) và Not Safe ($\sim 52,8\%$)
@@ -54,13 +56,17 @@ hai nhóm. Điều này giúp tránh tình trạng mô hình dự đoán thiên 
 % ------------------------------------------------------------
 \subsection{Phân tích null ngữ nghĩa và kiểm toán rò rỉ dữ liệu}
 
-\subsubsection*{2.1\enspace Semantic Null — null không phải thiếu data}
+\subsubsection{Phân tích toán tử khuyết mang ngữ nghĩa (Semantic Null)}
 
-Sai lầm phổ biến là fillna/drop tất cả null cơ học. Trong OULAD mỗi
-null đều mang ngữ nghĩa cụ thể:
+Một sai lầm phổ biến trong giai đoạn tiền xử lý dữ liệu là việc thực hiện
+ điền giá trị khuyết (\texttt{fillna}) hoặc loại bỏ (\texttt{dropna}) tất cả
+  các giá trị \texttt{null} một cách máy móc. Đối với bộ dữ liệu OULAD, các 
+  giá trị rỗng không đơn thuần biểu thị sự thiếu hụt dữ liệu (Missing Data), 
+  mà ngược lại, mỗi vị trí \texttt{null} đều mang một ngữ nghĩa cụ thể:
 
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|r|p{3.6cm}|p{3.4cm}|}
 \hline
 \textbf{Cột} & \textbf{Null \%} & \textbf{Ý nghĩa thực} & \textbf{Quyết định} \\
@@ -73,12 +79,13 @@ null đều mang ngữ nghĩa cụ thể:
 \end{tabular}
 \end{center}
 
-\texttt{date\_unregistration} có giá trị ở \textbf{99,1\%} ca Withdrawn
-$\Rightarrow$ proxy gần tuyệt đối của label, bắt buộc drop để tránh
-leakage 100\%. Ngược lại, NULL ở 69,1\% còn lại là tín hiệu
-\textit{positive} (sinh viên tiếp tục học).
+Cụ thể, thuộc tính \texttt{date\_unregistration} có giá trị xuất hiện ở \textbf{99,1\%} 
+nhóm người học có kết quả \textit{Withdrawn}. Điều này biến đặc trưng này 
+thành một biến đại diện (\textit{proxy}) gần như tuyệt đối cho nhãn mục tiêu, khiến 
+mô hình đối mặt với nguy cơ rò rỉ dữ liệu (\textit{data leakage}) nghiêm trọng. Do đó, 
+việc loại bỏ (\textit{drop}) đặc trưng này là bắt buộc để đảm bảo tính khách quan cho mô hình dự báo.
 
-\subsubsection*{2.2\enspace Chọn cut-off theo data}
+\subsubsection{Chọn cut-off theo data}
 
 Median module length 262 ngày. Phân tích phân phối ngày rút môn trên
 $n=10.156$ Withdrawn: day~135 ($51,6\%$ module) capture $\ge 80\%$
@@ -90,13 +97,14 @@ năng can thiệp); \textbf{cut-off cuối kỳ = \{30, 60, 90, 135\}} để
 theo dõi cách tín hiệu tích luỹ theo thời gian khi đánh giá lại ở
 cuối module.
 
-\subsubsection*{2.3\enspace Kiểm toán leakage tại cut-off 135}
+\subsubsection{Kiểm toán leakage tại cut-off 135}
 
 Toàn bộ 206 bài đánh giá phân loại SAFE (\texttt{deadline} $\le 135$)
 vs LEAKAGE (\texttt{deadline} $> 135$):
 
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|r|r|r|p{3.4cm}|}
 \hline
 \textbf{Loại} & \textbf{SAFE} & \textbf{LEAK} & \textbf{Median submit ratio} & \textbf{Quyết định} \\
@@ -116,13 +124,14 @@ hoá thành \texttt{cma\_submission\_rate}.
 % ------------------------------------------------------------
 \subsection{Phân tích tín hiệu feature}
 
-\subsubsection*{3.1\enspace Tín hiệu nhân khẩu học}
+\subsubsection{Tín hiệu nhân khẩu học}
 
 Chi-square test ($n = 32.593$) trên các biến categorical so với nhãn
 \texttt{final\_result}:
 
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|r|l|}
 \hline
 \textbf{Feature} & \textbf{$\chi^2$} & \textbf{Signal} \\
@@ -142,7 +151,7 @@ Chi-square test ($n = 32.593$) trên các biến categorical so với nhãn
 \textbf{90 lần} $\Rightarrow$ drop. 4 biến mạnh được giữ và encode
 ordinal để bảo toàn quan hệ monotonic cho tree-based model.
 
-\subsubsection*{3.2\enspace Hiệu ứng kỳ học (Semester B vs J)}
+\subsubsection{Hiệu ứng kỳ học (Semester B vs J)}
 
 Pass rate kỳ B (tháng 2) $= 43{,}67\%$ ($n=12.488$), kỳ J (tháng 10)
 $= 49{,}40\%$ ($n=20.105$). Chênh lệch không đồng đều theo module: CCC
@@ -150,7 +159,7 @@ diff $= -6{,}38$ pp, EEE diff $= -6{,}28$ pp (vượt ngưỡng $\pm 5$ pp)
 $\Rightarrow$ semester \textbf{phải là feature}, không lọc bỏ.
 
 % ------------------------------------------------------------
-\subsection*{Kết luận EDA}
+\subsection{Kết luận EDA}
 
 EDA xác định các nhóm tín hiệu khả dụng tại cut-off 135: (i)~nhân
 khẩu học (4 biến sau chi-square), (ii)~điểm có trọng số trước
