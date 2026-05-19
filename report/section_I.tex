@@ -6,9 +6,7 @@
 % ------------------------------------------------------------
 \subsection{Tổng quan dataset và phân phối biến mục tiêu}
 
-OULAD gồm 7 bảng quan hệ, phủ 32.593 lượt đăng ký học phần với
-10.655.280 lượt tương tác VLE. Bài toán phân loại 4 nhãn
-\texttt{final\_result} $\in$ \{Pass, Withdrawn, Fail, Distinction\}.
+OULAD là bộ dữ liệu học tập liên kết gồm 7 bảng quan hệ, bao gồm thông tin của 32.593 lượt đăng ký môn học và hơn 10,6 triệu lượt tương tác trên môi trường học tập ảo (VLE). Biến mục tiêu thể hiện kết quả học tập của người học được chia thành 4 loại \texttt{final\_result} $\in$ \{Pass, Withdrawn, Fail, Distinction\}.
 
 \begin{center}
 \small
@@ -41,9 +39,17 @@ Distinction &  3.024 & \phantom{0}9,28\% \\
 \end{tabular}
 \end{center}
 
-Distinction chiếm $9,28\%$ — class nhỏ nhất, ít hơn Pass $\sim 4$ lần
-$\Rightarrow$ chọn \textbf{Macro-F1} làm metric chính để không bỏ qua
-class thiểu số.
+Trong phạm vi đồ án này, nhóm thực hiện chuyển đổi bài toán về dạng \textbf{phân loại nhị phân} bằng cách gộp các nhãn mục tiêu ban đầu thành hai nhóm chính:
+\begin{itemize}
+    \item \textbf{Safe}: Gồm các sinh viên đạt kết quả \textit{Pass} hoặc \textit{Distinction} (nhóm sinh viên an toàn).
+    \item \textbf{Not Safe}: Gồm các sinh viên rơi vào trạng thái \textit{Fail} hoặc \textit{Withdrawn} (nhóm sinh viên gặp rủi ro học tập).
+\end{itemize}
+
+Sau khi chuyển đổi, tỷ lệ giữa nhóm Safe ($\sim 47,2\%$) và Not Safe ($\sim 52,8\%$)
+tương đối cân bằng. Tuy nhiên, nhóm vẫn chọn \textbf{Macro-F1} làm độ đo đánh
+giá chính nhằm đảm bảo mô hình có khả năng phân loại tốt và công bằng trên cả
+hai nhóm. Điều này giúp tránh tình trạng mô hình dự đoán thiên lệch, từ đó
+đảm bảo hệ thống cảnh báo sớm đưa ra các quyết định can thiệp đáng tin cậy.
 
 % ------------------------------------------------------------
 \subsection{Phân tích null ngữ nghĩa và kiểm toán rò rỉ dữ liệu}
@@ -59,7 +65,7 @@ null đều mang ngữ nghĩa cụ thể:
 \hline
 \textbf{Cột} & \textbf{Null \%} & \textbf{Ý nghĩa thực} & \textbf{Quyết định} \\
 \hline
-\texttt{date\_unregistration}   & 69,1\% & NULL = học đến hết module  & \textbf{Drop} (leakage 99,1\% Withdrawn) \\
+\texttt{date\_unregistration}   & 69,1\% & Học đến hết module         & Drop (leakage 99,1\% Withdrawn) \\
 \texttt{score}                  & 0,1\%  & Bài không nộp              & \texttt{fillna(0)} \\
 \texttt{imd\_band}              & 3,4\%  & Địa chỉ ngoài UK           & Encode \texttt{"Unknown"} \\
 \texttt{week\_from / week\_to}  & 82,4\% & Resource trải toàn module  & Drop cả 2 cột \\
