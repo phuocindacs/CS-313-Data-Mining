@@ -1,0 +1,72 @@
+% ============================================================
+%  KỸ THUẬT ĐẶC TRƯNG (FEATURE ENGINEERING)
+% ============================================================
+\section{Kỹ thuật đặc trưng (Feature Engineering)}
+
+\subsection{Thiết lập chung}
+
+Trong quá trình trích xuất đặc trưng, nhóm thiết lập mốc thời gian cắt dữ liệu (\textit{Cut-off Day}) tại ngày \textbf{135}. Giá trị \texttt{RANDOM\_SEED = 42} được sử dụng xuyên suốt toàn bộ pipeline để đảm bảo tính tái lập. Mục tiêu dự báo là phân loại nhị phân (Safe và Not Safe) nhằm ưu tiên phát hiện sớm nhóm sinh viên có nguy cơ (Fail/Withdrawn). Do đó, các độ đo \textbf{Recall (Not Safe)} và \textbf{Macro-F1} được sử dụng làm metric chính.
+
+\subsection{Tiền xử lý dữ liệu và làm sạch}
+
+Dựa trên phân tích ngữ nghĩa, các bước sau được thực hiện để xử lý dữ liệu khuyết:
+\begin{itemize}
+    \item \textbf{\texttt{date\_registration}}: Điền các giá trị thiếu bằng giá trị trung vị (median) của đợt học tương ứng.
+    \item \textbf{\texttt{imd\_band}}: Chuyển đổi các giá trị \texttt{null} thành nhãn ``Unknown'' (được gán giá trị 10, nằm ở cuối thang đo).
+    \item \textbf{\texttt{score}}: Điền giá trị 0 cho các bài đánh giá không có điểm (tương đương với việc không nộp bài).
+    \item \textbf{Loại bỏ các trường dữ liệu nhiễu}: Xóa bỏ cột \texttt{week\_from}, \texttt{week\_to} do tỷ lệ trống quá cao, và đặc biệt loại bỏ \texttt{date\_unregistration} nhằm ngăn chặn tình trạng rò rỉ dữ liệu (data leakage).
+\end{itemize}
+
+\subsection{Nhóm đặc trưng tương tác trước khóa học}
+
+Để đo lường mức độ chuẩn bị của người học trước ngày khai giảng ($ngày < 0$), nhóm trích xuất các đặc trưng sau:
+\begin{itemize}
+    \item \textbf{\texttt{pre\_course\_clicks}}: Tổng lượng tương tác của người học trên hệ thống trước ngày 0.
+    \item \textbf{\texttt{pre\_course\_active\_days}}: Số ngày người học có truy cập hệ thống trước ngày 0.
+    \item \textbf{\texttt{has\_pre\_course\_activity}}: Biến nhị phân xác định người học có hoạt động chuẩn bị sớm hay không.
+\end{itemize}
+
+\subsection{Nhóm đặc trưng tương tác hệ thống (VLE)}
+
+Nhóm tập trung vào các hành vi tương tác biến thiên tính đến ngày 135:
+\begin{itemize}
+    \item \textbf{\texttt{last\_active\_day}}: Ngày tương tác cuối cùng trên hệ thống (đây là chỉ số quan trọng nhất để nhận diện nhóm Withdrawn).
+    \item \textbf{\texttt{std\_clicks}}: Độ lệch chuẩn của lượng click hàng ngày, nhằm đo lường tính kỷ luật và sự đều đặn trong quá trình học.
+    \item \textbf{\texttt{active\_days}}: Tổng số ngày thực tế mà người học có tương tác với hệ thống.
+    \item \textbf{Lượt tương tác hàng tuần (\textit{Weekly Clicks})}: Dữ liệu click được tổng hợp thành 20 biến (từ \texttt{clicks\_week\_1} đến \texttt{clicks\_week\_20}) tương ứng với $135/7$ tuần. Các tuần không có hoạt động được điền giá trị 0.
+    \item \textbf{Phân loại tài nguyên (\textit{Activity Breakdown})}: Lượng tương tác được chia theo các nhóm tài nguyên quan trọng: \texttt{clicks\_oucontent} (nội dung bài học chính), \texttt{clicks\_forumng} (tương tác diễn đàn - thường có tương quan cao với kết quả Pass), và \texttt{clicks\_quiz}, \texttt{clicks\_resource} (các tín hiệu bổ trợ).
+\end{itemize}
+
+\subsection{Nhóm đặc trưng đánh giá học tập}
+
+Chỉ các bài đánh giá có \texttt{deadline} $\le 135$ (Safe Assessment) mới được sử dụng. Toàn bộ các bài thi cuối kỳ (Exam) bị loại bỏ vì gây rò rỉ dữ liệu tuyệt đối.
+\begin{itemize}
+    \item \textbf{\texttt{weighted\_score\_before\_cutoff}}: Điểm tích lũy có trọng số trước ngày cắt, tính theo công thức $\frac{\sum (\text{score} \times \text{weight})}{\sum \text{weight}}$.
+    \item \textbf{\texttt{tma\_submission\_rate}} và \textbf{\texttt{cma\_submission\_rate}}: Tỉ lệ nộp bài, tính bằng công thức $\frac{n_{\text{submitted}}}{n_{\text{safe\_in\_module}}}$. Nếu học phần không có loại bài này trước ngày 135, giá trị được điền là $-1$. Nếu có bài nhưng người học không nộp, giá trị là $0$.
+    \item \textbf{\texttt{avg\_days\_before\_deadline}}: Trung bình số ngày nộp bài trước hạn. Trễ hạn sẽ có giá trị âm.
+    \item \textbf{\texttt{n\_missing\_submission}}: Tổng số bài đánh giá ``Safe'' mà người học bỏ lỡ.
+    \item \textbf{Xử lý ngoại lệ (Edge Cases)}: Học phần \textbf{GGG} có trọng số TMA bằng 0 nên không thể tính điểm tích lũy. Nhóm tạo thêm cột \texttt{has\_weighted\_score = 0} và dùng \texttt{TMA submission count} để thay thế. Đối với học phần \textbf{AAA} và \textbf{EEE}, do không có bài CMA trước ngày 135, \texttt{cma\_submission\_rate} được gán giá trị $-1$.
+\end{itemize}
+
+\subsection{Nhóm đặc trưng nhân khẩu học}
+
+\begin{itemize}
+    \item \textbf{\texttt{module\_semester}}: Kết hợp mã học phần và học kỳ (ví dụ: AAA\_B) và sử dụng phương pháp mã hóa nhãn (\textit{Label Encoding}).
+    \item \textbf{\texttt{num\_of\_prev\_attempts}}: Được giữ nguyên vì có tương quan mạnh với rủi ro trượt hoặc rút môn.
+    \item \textbf{Mã hóa thứ tự (\textit{Ordinal Encoding})}: 
+    \begin{itemize}
+        \item \texttt{highest\_education}: Sắp xếp theo trình độ từ thấp đến cao.
+        \item \texttt{age\_band}: $0-35 < 35-55 < 55+$.
+        \item \texttt{imd\_band}: $0-10\% < \dots < 90-100\% < \text{Unknown}$.
+    \end{itemize}
+    \item Đặc trưng \texttt{gender} bị loại bỏ vì đóng góp rất yếu vào khả năng dự báo.
+\end{itemize}
+
+\subsection{Chiến lược phân chia dữ liệu và chuẩn hóa}
+
+Nhóm thiết lập quy trình chuẩn bị dữ liệu huấn luyện nghiêm ngặt nhằm tránh rò rỉ:
+\begin{itemize}
+    \item \textbf{Phân tầng (\textit{Stratified Split})}: Tập dữ liệu được phân chia dựa trên nhãn mục tiêu và mã học phần nhằm đảm bảo sự phân bố đồng đều giữa các tập.
+    \item \textbf{Chia theo cấp độ người học (\textit{Student-level Split})}: Đảm bảo tất cả các bản ghi thuộc về cùng một \texttt{id\_student} phải nằm hoàn toàn trong tập Train hoặc tập Test. Điều này ngăn chặn việc mô hình ``ghi nhớ'' hành vi của cùng một người học ở các học phần khác nhau.
+    \item \textbf{Chuẩn hóa (Scaling)}: Đối với các mô hình cây quyết định (Random Forest, XGBoost), dữ liệu không cần chuẩn hóa. Khi sử dụng các mô hình tuyến tính, phương pháp \texttt{StandardScaler} được áp dụng, trong đó chỉ gọi hàm \texttt{fit} trên tập Train và \texttt{transform} cho tập Test để tránh rò rỉ dữ liệu thống kê.
+\end{itemize}
