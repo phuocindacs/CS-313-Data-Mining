@@ -1,0 +1,18 @@
+[server]
+port = 8501
+address = "127.0.0.1"
+headless = true
+enableCORS = false
+enableXsrfProtection = false
+fileWatcherType = "none"
+maxUploadSize = 50
+
+[browser]
+serverAddress = "127.0.0.1"
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+
+[logger]
+level = "error"
