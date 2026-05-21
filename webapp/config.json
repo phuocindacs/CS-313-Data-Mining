@@ -1,0 +1,27 @@
+{
+  "data": {
+    "test_long": "data/df_test_long.csv",
+    "test_display": "data/df_test.csv",
+    "x_seq_test": "data/X_seq_test.npy",
+    "x_static_test": "data/X_static_test.npy",
+    "mask_test": "data/mask_test.npy",
+    "y_test": "data/y_test.npy",
+    "feature_detail": "data/feature_cols_detail.json"
+  },
+  "ml": {
+    "weeks": [4, 8, 12, 16, 20, 24],
+    "xgboost_pattern": "../ketqua/OULAD ML/models/xgb_model_week_{w}.pkl",
+    "lgbm_pattern": "../ketqua/OULAD ML/models/lgbm_model_week_{w}.pkl"
+  },
+  "dl": {
+    "lstm": {
+      "path": "../ketqua/OULAD sequence/models/best_lstm_model.pth",
+      "params": "../ketqua/OULAD sequence/models/best_lstm_params.json"
+    },
+    "transformer": {
+      "path": "../ketqua/OULAD sequence/models/best_transformer_model.pth",
+      "params": "../ketqua/OULAD sequence/models/best_transformer_params.json"
+    }
+  },
+  "labels": {"0": "Not At-Risk", "1": "At-Risk"}
+}
