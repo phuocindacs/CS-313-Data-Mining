@@ -85,13 +85,26 @@ class ModelRegistry:
         self.ml_models: dict = {}   # {"XGBoost_w4": model, "LGBM_w4": model, ...}
         self.dl_models: dict = {}   # {"LSTM": model, "TRANSFORMER": model}
         self.device = torch.device("cpu")  # always CPU for inference stability
-        self.n_dynamic: int = 33
-        self.n_static: int = 25
+        self.n_dynamic: int = 0
+        self.n_static: int = 0
         self.t_max: int = 25
         self.weeks: list = [4, 8, 12, 16, 20, 24]
+        self.dynamic_features: list = []
+        self.static_features: list = []
 
     def load_all(self, cfg: dict, base_dir: Path):
         """Load all models from config. base_dir = webapp/ directory."""
+        # Read feature dimensions from feature_meta.json — single source of truth.
+        # Run run_sequence_fe.py to regenerate if dimensions change after retraining.
+        meta_path = base_dir / "data" / "feature_meta.json"
+        with open(meta_path) as f:
+            _meta = json.load(f)
+        self.dynamic_features = _meta["DYNAMIC_FEATURES"]
+        self.static_features  = _meta["STATIC_FEATURES"]
+        self.n_dynamic = len(self.dynamic_features)
+        self.n_static  = len(self.static_features)
+        print(f"  Features: {self.n_dynamic} dynamic + {self.n_static} static (from feature_meta.json)")
+
         self._load_ml_models(cfg["ml"], base_dir)
         self._load_dl_models(cfg["dl"], base_dir)
 
@@ -125,6 +138,23 @@ class ModelRegistry:
                 with open(params_path) as f:
                     params = json.load(f)
 
+                # Load state dict first — needed for max_len inference and sanity check.
+                state = torch.load(model_path, map_location=self.device, weights_only=True)
+
+                # Sanity check: verify state_dict input dimension matches feature_meta.json.
+                # Mismatches mean data files are stale — run run_sequence_fe.py to fix.
+                if model_name == "lstm":
+                    expected_dyn = state["lstm.weight_ih_l0"].shape[1]
+                elif model_name == "transformer":
+                    expected_dyn = state["input_proj.weight"].shape[1]
+                else:
+                    expected_dyn = self.n_dynamic
+                if expected_dyn != self.n_dynamic:
+                    raise RuntimeError(
+                        f"{model_name.upper()} expects {expected_dyn} dynamic features but "
+                        f"feature_meta.json has {self.n_dynamic}. Run run_sequence_fe.py to regenerate data."
+                    )
+
                 if model_name == "lstm":
                     model = EWSLSTM(
                         n_dynamic=self.n_dynamic,
@@ -134,8 +164,6 @@ class ModelRegistry:
                         dropout=params["dropout"],
                     )
                 elif model_name == "transformer":
-                    # Infer max_len from checkpoint pos_emb shape to avoid mismatch
-                    state = torch.load(model_path, map_location=self.device, weights_only=True)
                     max_len = state.get("pos_emb.weight", torch.empty(self.t_max + 8, 0)).shape[0]
                     model = EWSTransformer(
                         n_dynamic=self.n_dynamic,
@@ -149,9 +177,6 @@ class ModelRegistry:
                 else:
                     print(f"  ✗ Unknown DL model type: {model_name}")
                     continue
-
-                if model_name != "transformer":
-                    state = torch.load(model_path, map_location=self.device, weights_only=True)
                 model.load_state_dict(state)
                 model.eval()
                 model.to(self.device)
