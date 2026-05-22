@@ -1,0 +1,119 @@
+% ============================================================
+%  MO HINH HOA (MODELING)
+% ============================================================
+\section{Mô hình hóa (Modeling)}
+
+\subsection{Phạm vi thử nghiệm}
+
+Phần modeling trong đồ án được thực hiện trên hai nhánh khác nhau: nhánh mô hình học máy truyền thống và nhánh
+mô hình chuỗi. Các mô hình được đánh giá theo nhiều mốc thời gian để phản ánh đúng bài toán cảnh báo sớm.
+Với nhánh ML, nhóm sử dụng các snapshot tuần 4, 8, 12, 16, 20 và 24. Với nhánh sequence,
+mô hình được đánh giá liên tục theo từng tuần, từ giai đoạn đầu khóa học đến cuối khóa học.
+Các metric chính gồm AUC-ROC, Accuracy, Precision, Recall và F1-score.
+
+\subsection{Mô hình XGBoost và LightGBM}
+
+Trong nhánh ML truyền thống, nhóm huấn luyện hai mô hình
+tree boosting là \textbf{XGBoost} và \textbf{LightGBM} cho từng snapshot tuần. Mỗi snapshot
+chỉ sử dụng thông tin đã có tới thời điểm tương ứng, nhờ đó mô phỏng được tình huống hệ
+thống cảnh báo được cập nhật định kỳ trong quá trình học.
+
+\begin{center}
+\small
+\textbf{Kết quả LightGBM}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Tuần} & \textbf{AUC} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\hline
+4  & 0,8221 & 0,7397 & 0,7428 & 0,7570 & 0,7499 \\
+8  & 0,8738 & 0,7811 & 0,8583 & 0,6890 & 0,7644 \\
+12 & 0,8870 & 0,7981 & 0,8135 & 0,7892 & 0,8012 \\
+16 & 0,9263 & 0,8518 & 0,9169 & 0,7834 & 0,8449 \\
+20 & 0,9441 & 0,8774 & 0,9200 & 0,8347 & 0,8753 \\
+24 & \textbf{0,9626} & \textbf{0,9015} & \textbf{0,9372} & \textbf{0,8670} & \textbf{0,9007} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\small
+\textbf{Kết quả XGBoost}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Tuần} & \textbf{AUC} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\hline
+4  & 0,8266 & 0,7263 & 0,6948 & 0,8363 & 0,7590 \\
+8  & 0,8775 & 0,7829 & 0,8592 & 0,6921 & 0,7666 \\
+12 & 0,8826 & 0,7893 & 0,7934 & 0,7994 & 0,7964 \\
+16 & 0,9295 & 0,8485 & 0,9211 & 0,7722 & 0,8401 \\
+20 & 0,9454 & 0,8778 & 0,9259 & 0,8292 & 0,8749 \\
+24 & \textbf{0,9624} & \textbf{0,9012} & \textbf{0,9391} & \textbf{0,8642} & \textbf{0,9001} \\
+\hline
+\end{tabular}
+\end{center}
+
+
+Kết quả cho thấy cả hai mô hình đều cải thiện rõ khi có thêm dữ liệu theo thời gian. Ở tuần
+4, mô hình đã đạt F1 khoảng 0,75, cho thấy các tín hiệu ban đầu đủ mạnh để phát cảnh báo sớm.
+Đến tuần 24, F1 đạt khoảng 0,90 và AUC vượt 0,96.
+
+
+\subsection{Mô hình LSTM và Transformer}
+
+Nhánh sequence sử dụng dữ liệu dạng
+chuỗi theo tuần để huấn luyện mô hình \textbf{LSTM} và \textbf{Transformer}. Mô hình nhận hai nhóm đầu vào: đặc trưng
+động theo thời gian và đặc trưng tĩnh của sinh viên. 
+
+\begin{center}
+\small
+\textbf{Kết quả LSTM}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Tuần} & \textbf{AUC} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\hline
+4  & 0,8147 & 0,7352 & 0,8106 & 0,6343 & 0,7117 \\
+8  & 0,8790 & 0,7884 & 0,8864 & 0,6760 & 0,7670 \\
+12 & 0,8969 & 0,8171 & 0,8866 & 0,7398 & 0,8066 \\
+16 & 0,9311 & 0,8571 & 0,9338 & 0,7779 & 0,8487 \\
+20 & 0,9472 & 0,8800 & 0,9616 & 0,7991 & 0,8728 \\
+24 & 0,9639 & 0,9023 & 0,9659 & 0,8401 & 0,8986 \\
+33 & \textbf{0,9808} & \textbf{0,9329} & \textbf{0,9752} & \textbf{0,8926} & \textbf{0,9321} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\small
+\textbf{Kết quả Transformer}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Tuần} & \textbf{AUC} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\hline
+4  & 0,8277 & 0,7481 & 0,7805 & 0,7114 & 0,7443 \\
+8  & 0,8791 & 0,7923 & 0,8663 & 0,7058 & 0,7779 \\
+12 & 0,8963 & 0,8099 & 0,8490 & 0,7675 & 0,8062 \\
+16 & 0,9288 & 0,8552 & 0,8867 & 0,8244 & 0,8544 \\
+20 & 0,9430 & 0,8763 & 0,9214 & 0,8308 & 0,8738 \\
+24 & 0,9629 & 0,8996 & 0,9202 & 0,8818 & 0,9006 \\
+33 & \textbf{0,9775} & \textbf{0,9295} & \textbf{0,9742} & \textbf{0,8866} & \textbf{0,9284} \\
+\hline
+\end{tabular}
+\end{center}
+
+LSTM và Transformer thể hiện xu hướng tăng ổn định theo số tuần quan sát. Ở tuần 12, F1 đạt 0,8; đến
+tuần 24 đạt 0,9; và ở tuần 33 đạt 0,93. Điều này cho thấy mô hình khai thác tốt thông
+tin tích lũy dài hạn trong chuỗi hành vi học tập.
+
+
+\subsection{Kết luận}
+
+Ở các tuần 20--24, cả mô hình ML theo snapshot và mô hình sequence đều đạt F1 xấp xỉ 0,87--0,90, cho thấy hệ thống đã có thể đưa ra cảnh báo tương đối tin cậy trước khi kết thúc khóa học. Các mô hình đã sẵn sàng để được đóng gói và triển khai trên ứng dụng thực tế.
+\newpage
