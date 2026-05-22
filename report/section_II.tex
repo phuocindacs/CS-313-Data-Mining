@@ -97,14 +97,6 @@ Sau khi phân chia Train/Test theo kỳ học thực tế, dữ liệu được 
 
 \subsection{Định dạng Tensor 3D và Causal Scaling}
 
-Các đặc trưng được tổng hợp thành cấu trúc Tensor trong PyTorch để huấn luyện:
-\begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{X\_seq}: Kích thước $(N, T_{MAX}, 33)$, với $N$ là số lượt học, $T_{MAX} = 25$ tuần, và $33$ đặc trưng động tại mỗi timestep.
-    \item \textbf{X\_static}: Kích thước $(N, 25)$ đặc trưng tĩnh.
-    \item \textbf{mask}: Kích thước $(N, T_{MAX})$ kiểu nhị phân dùng để che phủ (\textit{padding}) phục vụ chiến lược Random-Truncation Training.
-    \item \textbf{y}: Kích thước $(N)$ lưu trữ nhãn thực tế.
-\end{itemize}
-
 Chuẩn hóa dữ liệu bằng \texttt{StandardScaler} tránh rò rỉ thông tin từ tập Test vào tập Train.
 
 \subsection{Phân tích tương quan và Lọc bỏ đặc trưng (Feature Selection)}
