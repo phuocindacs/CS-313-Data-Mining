@@ -28,7 +28,7 @@ class ShapExplainer:
             week: cutoff week (e.g. 4, 8, ...)
             student_idx: position in test set
             model: fitted sklearn-compatible model
-            X_row: (1, n_features) scaled feature array
+            X_row: (1, n_features) raw (unscaled) feature array
             feature_names: list of feature name strings
 
         Returns:
