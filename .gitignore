@@ -6,12 +6,10 @@ data/
 *.zip
 
 # 2. ML Models & Logs (Chặn đẩy model weights lên Git)
-*.pkl
 *.h5
 *.pt
 *.pth
 *.joblib
-models/
 runs/
 
 # 3. Jupyter Notebook checkpoints
