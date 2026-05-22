@@ -10,7 +10,6 @@ data/
 *.pt
 *.pth
 *.joblib
-models/
 runs/
 
 # 3. Jupyter Notebook checkpoints
