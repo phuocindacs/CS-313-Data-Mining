@@ -6,7 +6,9 @@
     "x_static_test": "data/X_static_test.npy",
     "mask_test": "data/mask_test.npy",
     "y_test": "data/y_test.npy",
-    "feature_detail": "data/feature_cols_detail.json"
+    "feature_detail": "data/feature_cols_detail.json",
+    "scaler_seq": "data/scaler_seq.pkl",
+    "scaler_static": "data/scaler_static.pkl"
   },
   "ml": {
     "weeks": [4, 8, 12, 16, 20, 24],

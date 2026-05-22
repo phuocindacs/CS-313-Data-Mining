@@ -59,7 +59,7 @@ def render():
             <span class='section-title'>Student ID</span><br>
             <span style='font-size:18px; font-weight:600;'>{student.get('student_id', '—')}</span>
             &nbsp;&nbsp;
-            <span class='badge {badge_cls}'>{actual}</span>
+            <span class='badge {badge_cls}'>Actual: {actual}</span>
         </div>
         """, unsafe_allow_html=True)
 

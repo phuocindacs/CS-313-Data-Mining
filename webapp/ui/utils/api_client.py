@@ -69,3 +69,11 @@ def shap_explain(student_idx: int, week: int, model: str = "XGBoost") -> dict:
     Returns shap_values, base_value, feature_values, feature_names.
     """
     return _post("/shap", {"student_index": student_idx, "week": week, "model": model}, timeout=TIMEOUT_SHAP)
+
+
+def explain_dl(student_idx: int, week: int, model: str = "LSTM") -> dict:
+    """Integrated Gradients attribution for a DL model (LSTM or Transformer).
+
+    Returns feature_attributions, feature_names, week_importance, weeks_axis, prediction.
+    """
+    return _post("/explain/dl", {"student_index": student_idx, "week": week, "model": model}, timeout=TIMEOUT_SHAP)
