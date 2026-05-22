@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from api.model_loader import registry
 from api.data_manager import data_manager
-from api.routes import predict, students, metadata, timeline
+from api.routes import predict, students, metadata, timeline, explain
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -64,6 +64,7 @@ app.add_middleware(
 )
 
 app.include_router(predict.router, tags=["Prediction"])
+app.include_router(explain.router, tags=["Explainability"])
 app.include_router(students.router, tags=["Students"])
 app.include_router(metadata.router, tags=["Metadata"])
 app.include_router(timeline.router, tags=["Timeline"])
