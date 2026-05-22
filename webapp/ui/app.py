@@ -25,6 +25,11 @@ st.markdown("""
     html, body, [class*="css"] { font-family: 'Segoe UI', Roboto, sans-serif; }
     h1, h2, h3 { font-weight: 600; }
 
+    /* Lock sidebar open — hide all collapse/expand toggle buttons */
+    [data-testid="collapsedControl"] { display: none !important; }
+    button[data-testid="baseButton-header"] { display: none !important; }
+    section[data-testid="stSidebar"] > div > div > div > button { display: none !important; }
+
     /* Prediction card — adapts to dark/light mode */
     .pred-card {
         border: 1px solid rgba(128,128,128,0.25);
