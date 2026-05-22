@@ -88,14 +88,14 @@ Chiến lược phân chia Out-of-Time (OOT) theo kỳ học thực tế:
     \item \textbf{Tập Test (11.260 lượt học)}: Gồm dữ liệu sinh viên thuộc kỳ học cuối cùng (\texttt{2014J}).
 \end{itemize}
 
-Sau khi phân chia Train/Test theo kỳ học thực tế, dữ liệu được kết xuất dưới ba định dạng chính để phục vụ huấn luyện các thuật toán học máy khác nhau:
+Dữ liệu sau khi phân chia được kết xuất thành ba định dạng phục vụ huấn luyện:
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Định dạng dài (LONG Format - \texttt{df\_train\_long.csv}, \texttt{df\_test\_long.csv})}: Dạng bảng tuần (\textit{panel data}) với mỗi lượt học của sinh viên gồm đúng 25 hàng tương ứng với 25 timestep tuần học học tập (từ tuần 0 đến tuần 24), phục vụ tốt nhất cho các mô hình học sâu chuỗi thời gian như LSTM hay Transformer.
-    \item \textbf{Định dạng rộng (WIDE Format - \texttt{df\_train.csv}, \texttt{df\_test.csv})}: Dữ liệu phẳng được trích xuất bằng cách lấy snapshot tại tuần cuối cùng của kỳ học trước mốc cutoff ($T = 24$), thu gọn chuỗi đặc trưng thành một dòng duy nhất cho mỗi học viên, đặc biệt thích hợp cho huấn luyện so sánh hoặc dự đoán nhanh qua các mô hình học máy truyền thống như XGBoost hay LightGBM.
-    \item \textbf{Định dạng mảng (TENSOR Format - các file \texttt{.npy})}: Lưu trữ các mảng numpy 3D và 2D đã được chuẩn hóa sâu (\texttt{X\_seq\_train.npy}, \texttt{X\_static\_train.npy}, \texttt{y\_train.npy}, v.v.) để tăng tốc độ nạp dữ liệu trực tiếp vào mô hình PyTorch trong suốt quá trình train.
+    \item \textbf{LONG Format} (\texttt{df\_train\_long.csv}, \texttt{df\_test\_long.csv}): Dạng bảng tuần (\textit{panel data}, 25 dòng/lượt học) cho LSTM và Transformer.
+    \item \textbf{WIDE Format} (\texttt{df\_train.csv}, \texttt{df\_test.csv}): Dạng phẳng (snapshot tại tuần học cuối $T=24$) cho XGBoost và LightGBM.
+    \item \textbf{TENSOR Format} (các file \texttt{.npy}): Các mảng numpy 3D/2D đã chuẩn hóa để nạp trực tiếp vào PyTorch.
 \end{itemize}
 
-\subsection{Định dạng Tensor 3D và Causal Scaling}
+\subsection{Chuẩn hóa dữ liệu với Causal Scaling}
 
 Chuẩn hóa dữ liệu bằng \texttt{StandardScaler} tránh rò rỉ thông tin từ tập Test vào tập Train.
 
