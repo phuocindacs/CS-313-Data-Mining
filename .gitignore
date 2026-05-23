@@ -9,7 +9,9 @@ data/
 *.h5
 *.pt
 *.pth
+*.pkl
 *.joblib
+*.npy
 runs/
 
 # 3. Jupyter Notebook checkpoints

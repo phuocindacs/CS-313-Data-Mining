@@ -71,6 +71,11 @@ def shap_explain(student_idx: int, week: int, model: str = "XGBoost") -> dict:
     return _post("/shap", {"student_index": student_idx, "week": week, "model": model}, timeout=TIMEOUT_SHAP)
 
 
+def get_metrics() -> dict:
+    """Return evaluation metrics (AUC, F1, Precision, Recall, Accuracy, CM) per model per week."""
+    return _get("/metrics", timeout=TIMEOUT_LONG)
+
+
 def explain_dl(student_idx: int, week: int, model: str = "LSTM") -> dict:
     """Integrated Gradients attribution for a DL model (LSTM or Transformer).
 
