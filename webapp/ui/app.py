@@ -1,5 +1,5 @@
 """OULAD Early Warning System — Streamlit main app.
-4 pages: Risk Timeline, Week Detail, Explainability, Model Metrics.
+3 pages: Risk Timeline, Week Detail, Explainability.
 """
 
 # Fix Python 3.12+ / Windows asyncio WebSocket issue with Streamlit
@@ -72,7 +72,7 @@ with st.sidebar:
 
     page = st.radio(
         "Page",
-        ["📈 Risk Timeline", "🔍 Week Detail", "📊 Explainability", "📋 Model Metrics"],
+        ["📈 Risk Timeline", "🔍 Week Detail", "📊 Explainability"],
         label_visibility="collapsed",
     )
 
@@ -87,7 +87,7 @@ with st.sidebar:
         ml = h.get("ml_models", 0)
         dl = h.get("dl_models", 0)
         ready = h.get("data_ready", False)
-        st.success(f"✅ API online\n{ml} ML · {dl} DL models")
+        st.success("✅ API online")
         if not ready:
             st.warning("⚠️ Data not ready yet")
 
@@ -106,6 +106,3 @@ elif "📊" in page:
     from ui.views import shap_analysis
     shap_analysis.render()
 
-elif "📋" in page:
-    from ui.views import model_metrics
-    model_metrics.render()

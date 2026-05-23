@@ -92,7 +92,6 @@ def render():
         st.session_state["detail_result"] = result
         st.session_state["detail_last"] = (student_idx, week)
     elif "detail_result" not in st.session_state:
-        st.info("👆 Chọn học sinh và tuần, sau đó bấm **Predict**.")
         return
     else:
         result = st.session_state["detail_result"]
@@ -140,20 +139,21 @@ def render():
             else:
                 st.info(f"{m}: not loaded")
 
-    # --- Consensus ---
-    all_probs = (
-        [p["probability"] for p in ml_preds.values()] +
-        [p["probability"] for p in dl_preds.values()]
+    # --- Consensus (majority vote) ---
+    all_labels = (
+        [p["label"] for p in ml_preds.values()] +
+        [p["label"] for p in dl_preds.values()]
     )
-    if all_probs:
-        avg = sum(all_probs) / len(all_probs)
-        consensus = "At-Risk" if avg >= 0.5 else "Not At-Risk"
-        badge_cls2 = "badge-risk" if avg >= 0.5 else "badge-safe"
+    if all_labels:
+        n_risk = sum(1 for l in all_labels if l == "At-Risk")
+        n_total = len(all_labels)
+        consensus = "At-Risk" if n_risk > n_total / 2 else "Not At-Risk"
+        badge_cls2 = "badge-risk" if consensus == "At-Risk" else "badge-safe"
         st.divider()
         st.markdown(f"""
         <div style="text-align:center; padding:12px;">
-            <span class="section-title">Ensemble average</span><br>
-            <span style="font-size:32px; font-weight:700;">{avg:.1%}</span>
+            <span class="section-title">Majority vote</span><br>
+            <span style="font-size:26px; font-weight:700;">{n_risk}/{n_total} models predict At-Risk</span>
             &nbsp;&nbsp;
             <span class="badge {badge_cls2}" style="font-size:15px;">{consensus}</span>
         </div>
