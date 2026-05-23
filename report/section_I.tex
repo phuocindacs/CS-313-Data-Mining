@@ -88,19 +88,29 @@ việc loại bỏ (\textit{drop}) đặc trưng này là bắt buộc để đ�
 \subsubsection{Chọn cut-off theo data}
 
 Median module length 262 ngày. Phân tích phân phối ngày rút môn trên
-$n=10.156$ Withdrawn: day~135 ($51,6\%$ module) capture $\ge 80\%$
-Withdrawn và còn $\sim 48\%$ thời gian can thiệp; day~175 capture
-$\ge 90\%$ nhưng chỉ còn $33,1\%$ thời gian $\Rightarrow$ quá trễ.
-Vì pipeline đánh giá trên nhiều mốc cảnh báo, chọn:
-\textbf{cut-off giữa kỳ = 135} (mốc chính, tối ưu coverage vs khả
-năng can thiệp); \textbf{cut-off cuối kỳ = \{30, 60, 90, 135\}} để
-theo dõi cách tín hiệu tích luỹ theo thời gian khi đánh giá lại ở
-cuối module.
+$n=10.156$ Withdrawn: day~135 capture $80{,}4\%$
+Withdrawn; day~170 capture $89{,}3\%$ và còn 92 ngày ($35{,}1\%$ thời
+gian module) để can thiệp. Nhóm chọn \textbf{cut-off = 170} làm mốc
+cắt dữ liệu cho Feature Engineering, tương ứng \textbf{25 tuần} học
+($T_{\max} = \lceil 170/7 \rceil$).
 
-\subsubsection{Kiểm toán leakage tại cut-off 135}
+Hai hướng tiếp cận mô hình sử dụng chung dữ liệu FE này:
+\begin{itemize}[noitemsep,topsep=0pt]
+    \item \textbf{Mô hình cây (XGBoost, LightGBM, CatBoost)}: Dự đoán
+    tại các mốc tuần \{4, 8, 12, 16, 20, 24\}. Tại mỗi mốc tuần $t$,
+    mô hình chỉ nhìn dữ liệu từ ngày $0$ đến ngày $7t - 1$, đảm bảo
+    không rò rỉ thông tin từ tương lai.
+    \item \textbf{Mô hình chuỗi (LSTM, Transformer)}: Nhận toàn bộ
+    chuỗi 25 tuần dưới dạng panel. Tại mỗi tuần $t$, mô hình chỉ
+    quan sát dữ liệu đến tuần $t$ nhờ cơ chế che nhân quả
+    (\textit{causal masking}), cho phép dự đoán liên tục mà không cần
+    mốc cắt cố định.
+\end{itemize}
 
-Toàn bộ 206 bài đánh giá phân loại SAFE (\texttt{deadline} $\le 135$)
-vs LEAKAGE (\texttt{deadline} $> 135$):
+\subsubsection{Kiểm toán rò rỉ dữ liệu}
+
+Toàn bộ 206 bài đánh giá phân loại SAFE (\texttt{deadline} $\le 170$)
+vs LEAKAGE (\texttt{deadline} $> 170$):
 
 \begin{center}
 \small
@@ -109,17 +119,17 @@ vs LEAKAGE (\texttt{deadline} $> 135$):
 \hline
 \textbf{Loại} & \textbf{SAFE} & \textbf{LEAK} & \textbf{Median submit ratio} & \textbf{Quyết định} \\
 \hline
-TMA  & \textbf{71} & 35 & 0,353 & Dùng (đa số SAFE) \\
-CMA  & 17 & \textbf{59} & 0,577 & Chuẩn hóa theo từng module \\
-Exam & 0  & \textbf{6}  & 0,927 & Drop hoàn toàn \\
+TMA  & \textbf{89} & 17 & 0,349 & Dùng (đa số SAFE) \\
+CMA  & 24 & \textbf{52} & 0,561 & Chuẩn hóa theo từng module \\
+Exam & 0  & \textbf{13} & 0,927 & Drop hoàn toàn \\
 \hline
 \end{tabular}
 \end{center}
 
 Median submit ratio Exam ($0{,}927$) $\Rightarrow$ bài thi luôn ở cuối
-kỳ, không có bài SAFE nào tại day~135, drop. CMA có 17/76 SAFE phân bố
-không đều giữa modules (AAA, EEE không có CMA) $\Rightarrow$ FE chuẩn
-hoá thành \texttt{cma\_submission\_rate}.
+kỳ, không có bài SAFE nào tại day~170, drop. CMA có 24/76 SAFE phân bố
+không đều giữa modules (FFF, GGG không có CMA SAFE trước day~170)
+$\Rightarrow$ FE chuẩn hoá thành \texttt{cma\_submission\_rate}.
 
 % ------------------------------------------------------------
 \subsection{Phân tích tín hiệu feature}
@@ -161,9 +171,9 @@ $\Rightarrow$ semester \textbf{phải là feature}, không lọc bỏ.
 % ------------------------------------------------------------
 \subsection{Kết luận EDA}
 
-EDA xác định các nhóm tín hiệu khả dụng tại cut-off 135: (i)~nhân
+EDA xác định các nhóm tín hiệu khả dụng tại cut-off 170: (i)~nhân
 khẩu học (4 biến sau chi-square), (ii)~điểm có trọng số trước
-cut-off (TMA SAFE 71/106), (iii)~hành vi nộp bài (submission rate,
+cut-off (TMA SAFE 89/106), (iii)~hành vi nộp bài (submission rate,
 deadline gap). Tín hiệu hành vi VLE sẽ phân tích chi tiết ở giai
 đoạn Feature Engineering sau khi thống nhất pipeline nhị phân
 (At-Risk vs Not At-Risk).
