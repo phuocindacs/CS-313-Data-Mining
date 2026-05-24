@@ -13,8 +13,8 @@ Dữ liệu được tái cấu trúc thành dạng chuỗi tuần (\textit{week
     \item \textbf{Mốc cắt (\textit{Cut-off Day})}: Ngày \textbf{170} của học kỳ, tương ứng tối đa \textbf{25 tuần} học ($T_{MAX} = 25$, độ dài tuần 7 ngày). Các tương tác và điểm số sau ngày 170 bị loại bỏ.
     \item \textbf{Nhãn mục tiêu}:
     \begin{itemize}[noitemsep,topsep=0pt]
-        \item Nguy cơ (Fail/Withdrawn): Gán 1.
-        \item An toàn (Pass/Distinction): Gán 0.
+        \item At Risk (Fail/Withdrawn): Gán 1.
+        \item Not At Risk (Pass/Distinction): Gán 0.
     \end{itemize}
 \end{itemize}
 
@@ -37,11 +37,11 @@ Quy trình làm sạch dữ liệu thô bao gồm:
 
 \subsection{Nhóm đặc trưng động hàng tuần (Weekly Causal Dynamic Features)}
 
-Đặc trưng tại tuần $t$ chỉ được tổng hợp từ dữ liệu phát sinh từ ngày $0$ đến $7(t+1) - 1$ để đảm bảo tính nhân quả. Quy trình trích xuất gồm hai nhóm:
+Đặc trưng tại tuần $t$ chỉ được tổng hợp từ dữ liệu phát sinh từ ngày $0$ đến $7t - 1$ để đảm bảo tính nhân quả. Quy trình trích xuất gồm hai nhóm:
 
 \textbf{1. Đặc trưng động theo tuần (Weekly Features):}
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Tương tác VLE trong tuần học t}: \texttt{clicks\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week} (tổng click), \texttt{active\_}\allowbreak\texttt{days\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week} (ngày hoạt động), thống kê click ngày (\texttt{max\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{median\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{std\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}), click ngày cuối tuần (\texttt{weekend\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}) và lượng tương tác theo 6 tài nguyên chính (\texttt{oucontent}, \texttt{forumng}, \texttt{homepage}, \texttt{subpage}, \texttt{url}, \texttt{quiz}).
+    \item \textbf{Tương tác VLE trong tuần học t}: \texttt{clicks\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week} (tổng click), \texttt{active\_}\allowbreak\texttt{days\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week} (ngày hoạt động), thống kê click ngày (\texttt{max\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{median\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{std\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}), click ngày cuối tuần (\texttt{weekend\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}) và lượng tương tác theo 4 tài nguyên chính (\texttt{oucontent}, \texttt{forumng}, \texttt{homepage}, \texttt{quiz}).
     \item \textbf{Kết quả đánh giá trong tuần học t}: Số bài đánh giá đã nộp, tổng điểm nhận được, tổng trọng số, tổng điểm có trọng số tương ứng và số ngày nộp trước hạn trung bình trong tuần. Đồng thời so sánh số bài TMA và CMA thực tế đã nộp với số bài đến hạn (\textbf{due deadline}) trong tuần $t$.
 \end{itemize}
 
@@ -103,14 +103,13 @@ Chuẩn hóa dữ liệu bằng \texttt{StandardScaler} tránh rò rỉ thông t
 
 Quy trình lọc bỏ đặc trưng:
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Kiểm định tương quan Pearson}: Tính toán tương quan giữa từng đặc trưng số động với nhãn mục tiêu tại tuần cuối cùng ($T = 24$), giữ lại các đặc trưng có $|corr| \ge 0{,}03$.
+    \item \textbf{Kiểm định tương quan Pearson}: Tính toán tương quan giữa từng đặc trưng số động với nhãn mục tiêu tại tuần cuối cùng ($T = 24$), giữ lại các đặc trưng có $|corr| \ge 0{,}05$.
     \item \textbf{Kiểm định Chi-square ($\chi^2$)}: Loại bỏ các đặc trưng có mức ý nghĩa $p\text{-value} > 0{,}05$.
 \end{itemize}
 
 Kết quả của quá trình lọc chọn đặc trưng:
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Dynamic Features}: Loại bỏ \textbf{9 đặc trưng}: \texttt{active\_}\allowbreak\texttt{rate\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{active\_}\allowbreak\texttt{days\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week}, \texttt{max\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{median\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{n\_}\allowbreak\texttt{missing\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{active\_}\allowbreak\texttt{span\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{cum\_}\allowbreak\texttt{clicks}, \texttt{weighted\_}\allowbreak\texttt{score\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{std\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}.
-    \item \textbf{Static Features}: Loại bỏ \textbf{11 đặc trưng}: \texttt{highest\_}\allowbreak\texttt{education\_}\allowbreak\texttt{encoded}, \texttt{imd\_}\allowbreak\texttt{band\_}\allowbreak\texttt{encoded}, \texttt{module\_}\allowbreak\texttt{semester\_}\allowbreak\texttt{encoded} và 8 biến giả khu vực địa lý.
+\item \textbf{Dynamic Features}: Loại bỏ \textbf{5 đặc trưng}: \texttt{ratio\_}\allowbreak\texttt{subpage\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{n\_}\allowbreak\texttt{submitted\_}\allowbreak\texttt{week}, \texttt{ratio\_}\allowbreak\texttt{url\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{gap\_}\allowbreak\texttt{std\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{weekend\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}.    \item \textbf{Static Features}: Loại bỏ \textbf{3 đặc trưng}: 3 biến giả khu vực địa lý (\texttt{region\_Scotland} (p = 0.76), \texttt{region\_East\_Midlands\_Region} (p = 0.16), \texttt{region\_Wales} (p = 0.06))
 \end{itemize}
-Mô hình LSTM và Transformer cuối cùng sẽ chỉ tiếp nhận chuỗi Tensor \texttt{X\_seq} gồm 24 đặc trưng động và Tensor tĩnh \texttt{X\_static} gồm 14 đặc trưng tĩnh đã được tinh lọc.\par
+Mô hình LSTM và Transformer cuối cùng sẽ chỉ tiếp nhận chuỗi Tensor \texttt{X\_seq} gồm 34 đặc trưng động và Tensor tĩnh \texttt{X\_static} gồm 16 đặc trưng tĩnh đã được tinh lọc.\par
 \endgroup
