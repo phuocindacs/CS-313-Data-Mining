@@ -48,7 +48,7 @@ Trong phạm vi đồ án này, nhóm thực hiện chuyển đổi bài toán v
 \end{itemize}
 
 Sau khi chuyển đổi, tỷ lệ giữa nhóm NOT AT-RISK ($\sim 47,2\%$) và AT-RISK ($\sim 52,8\%$)
-tương đối cân bằng. Tuy nhiên, nhóm vẫn chọn \textbf{Macro-F1} làm độ đo đánh
+tương đối cân bằng. Tuy nhiên, nhóm vẫn chọn \textbf{F1} làm độ đo đánh
 giá chính nhằm đảm bảo mô hình có khả năng phân loại tốt và công bằng trên cả
 hai nhóm. Điều này giúp tránh tình trạng mô hình dự đoán thiên lệch, từ đó
 đảm bảo hệ thống cảnh báo sớm đưa ra các quyết định can thiệp đáng tin cậy.
@@ -58,9 +58,7 @@ hai nhóm. Điều này giúp tránh tình trạng mô hình dự đoán thiên 
 
 \subsubsection{Phân tích toán tử khuyết mang ngữ nghĩa (Semantic Null)}
 
-Một sai lầm phổ biến trong giai đoạn tiền xử lý dữ liệu là việc thực hiện
- điền giá trị khuyết (\texttt{fillna}) hoặc loại bỏ (\texttt{dropna}) tất cả
-  các giá trị \texttt{null} một cách máy móc. Đối với bộ dữ liệu OULAD, các 
+Đối với bộ dữ liệu OULAD, các 
   giá trị rỗng không đơn thuần biểu thị sự thiếu hụt dữ liệu (Missing Data), 
   mà ngược lại, mỗi vị trí \texttt{null} đều mang một ngữ nghĩa cụ thể:
 
@@ -79,7 +77,7 @@ Một sai lầm phổ biến trong giai đoạn tiền xử lý dữ liệu là 
 \end{tabular}
 \end{center}
 
-Cụ thể, thuộc tính \texttt{date\_unregistration} có tỷ lệ null \textbf{69,1\%} trong toàn bộ bộ dữ liệu. Tuy nhiên, trong số những người học có kết quả \textit{Withdrawn}, \textbf{99,1\%} trường hợp này có giá trị không rỗng (tức là có ngày rút khỏi môn). Điều này cho thấy rằng sự xuất hiện của thuộc tính này gần như hoàn toàn liên kết với nhãn \textit{Withdrawn}, biến nó thành một biến đại diện (\textit{proxy}) tuyệt đối cho kết quả đã rút khỏi môn. Khi một mô hình học được mối liên hệ này, nó sẽ dựa vào sự có mặt hay vắng mặt của giá trị này để dự đoán, thay vì học từ các đặc trưng thực sự liên quan. Đây là rò rỉ dữ liệu (\textit{data leakage}) vì thông tin này thường chỉ khả dụng sau khi người học đã đưa ra quyết định rút khỏi môn. Do đó, loại bỏ (\textit{drop}) đặc trưng này là bắt buộc để đảm bảo mô hình học được các mối liên hệ có ý nghĩa thực tế.
+Lưu ý hai con số dễ gây nhầm: \textbf{69,1\%} là tỷ lệ null trên \textit{toàn bộ} dữ liệu, còn \textbf{99,1\%} là tỷ lệ người học \textit{Withdrawn} có ghi nhận ngày rút môn. Nói cách khác, gần như chỉ nhóm Withdrawn mới có giá trị này, biến nó thành biến đại diện (\textit{proxy}) cho nhãn mục tiêu. Do thông tin chỉ phát sinh sau khi người học rút môn, giữ lại sẽ gây rò rỉ dữ liệu (\textit{data leakage}); vì vậy nhóm loại bỏ đặc trưng này.
 
 \subsubsection{Chọn cut-off theo data}
 
