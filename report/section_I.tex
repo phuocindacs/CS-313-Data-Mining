@@ -144,14 +144,16 @@ Chi-square test ($n = 32.593$) trên các biến categorical so với nhãn
 \texttt{imd\_band}          &  666,9 & \textbf{Rất mạnh} \\
 \texttt{region}             &  449,7 & Mạnh \\
 \texttt{age\_band}          &  222,7 & Mạnh \\
-\texttt{gender}             &   16,5 & \textbf{Rất yếu} $\to$ drop \\
+\texttt{gender}             &   16,5 & Yếu \\
 \hline
 \end{tabular}
 \end{center}
 
-\texttt{gender} có $\chi^2$ thấp hơn \texttt{code\_module} gần
-\textbf{90 lần} $\Rightarrow$ drop. 4 biến mạnh được giữ và encode
-ordinal để bảo toàn quan hệ monotonic cho tree-based model.
+\texttt{gender} có $\chi^2$ thấp nhất, thấp hơn \texttt{code\_module}
+gần \textbf{90 lần}; tuy vậy vẫn chạm ngưỡng ý nghĩa thống kê
+($p < 0{,}05$) nên đây chưa phải tín hiệu để loại bỏ. Các biến nhân
+khẩu học có tín hiệu mạnh được encode ordinal để bảo toàn quan hệ
+monotonic cho tree-based model.
 
 Đặc trưng \texttt{disability} (dù có $\chi^2 = 138{,}5$) được loại bỏ vì lý do đạo đức. Sử dụng tình trạng khuyết tật như một yếu tố dự báo kết quả học tập có thể dẫn đến phân biệt đối xử và không công bằng với nhóm học sinh có khuyết tật. Do đó, mô hình chỉ sử dụng 4 biến nhân khẩu học còn lại.
 
