@@ -35,69 +35,52 @@ Quy trình làm sạch dữ liệu thô bao gồm:
     \item \textbf{Tương tác trước khóa học} ($date < 0$): \texttt{pre\_}\allowbreak\texttt{course\_}\allowbreak\texttt{clicks}, \allowbreak \texttt{pre\_}\allowbreak\texttt{course\_}\allowbreak\texttt{active\_}\allowbreak\texttt{days} và \texttt{has\_}\allowbreak\texttt{pre\_}\allowbreak\texttt{course\_}\allowbreak\texttt{activity}.
 \end{itemize}
 
-\subsection{Nhóm đặc trưng động hàng tuần (Weekly Causal Dynamic Features)}
+\subsection{Nhóm đặc trưng động nhân quả (Causal Dynamic Features)}
 
-Đặc trưng tại tuần $t$ chỉ được tổng hợp từ dữ liệu phát sinh từ ngày $0$ đến $7t - 1$ để đảm bảo tính nhân quả. Quy trình trích xuất gồm hai nhóm:
+Đặc trưng tại tuần $t$ chỉ được tổng hợp từ dữ liệu phát sinh từ ngày $0$ đến $7(t+1) - 1$ để đảm bảo tính nhân quả. Bao gồm ba nhóm:
 
-\textbf{1. Đặc trưng động theo tuần (Weekly Features):}
+\textbf{1. Tương tác VLE tích lũy:}
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Tương tác VLE trong tuần học t}: \texttt{clicks\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week} (tổng click), \texttt{active\_}\allowbreak\texttt{days\_}\allowbreak\texttt{this\_}\allowbreak\texttt{week} (ngày hoạt động), thống kê click ngày (\texttt{max\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{median\_}\allowbreak\texttt{daily\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}, \texttt{std\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}), click ngày cuối tuần (\texttt{weekend\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}) và lượng tương tác theo 4 tài nguyên chính (\texttt{oucontent}, \texttt{forumng}, \texttt{homepage}, \texttt{quiz}).
-    \item \textbf{Kết quả đánh giá trong tuần học t}: Số bài đánh giá đã nộp, tổng điểm nhận được, tổng trọng số, tổng điểm có trọng số tương ứng và số ngày nộp trước hạn trung bình trong tuần. Đồng thời so sánh số bài TMA và CMA thực tế đã nộp với số bài đến hạn (\textbf{due deadline}) trong tuần $t$.
+    \item \texttt{clicks\_this\_week}: Tổng click trong tuần $t$.
+    \item \texttt{cum\_active\_days}: Số ngày tương tác tích lũy.
+    \item \texttt{clicks\_per\_active\_day\_cum}: Click trung bình mỗi ngày hoạt động.
+    \item \texttt{days\_since\_last\_active}: Số ngày kể từ lần tương tác cuối.
 \end{itemize}
 
-\textbf{2. Đặc trưng động nhân quả (Causal Dynamic Features):}
+\textbf{2. Xu hướng tương tác và khoảng trống:}
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Tương tác VLE}:
-    \begin{itemize}[noitemsep,topsep=0pt]
-        \item \texttt{cum\_}\allowbreak\texttt{clicks}: Tổng click.
-        \item \texttt{cum\_}\allowbreak\texttt{active\_}\allowbreak\texttt{days}: Số ngày tương tác.
-        \item \texttt{active\_}\allowbreak\texttt{rate\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Tỷ lệ ngày hoạt động.
-        \item \texttt{clicks\_}\allowbreak\texttt{per\_}\allowbreak\texttt{active\_}\allowbreak\texttt{day\_}\allowbreak\texttt{cum}: Click trung bình mỗi ngày hoạt động.
-        \item \texttt{days\_}\allowbreak\texttt{since\_}\allowbreak\texttt{last\_}\allowbreak\texttt{active}: Số ngày từ lần tương tác cuối.
-        \item \texttt{active\_}\allowbreak\texttt{span\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Khoảng thời gian hoạt động.
-    \end{itemize}
-    \item \textbf{Xu hướng tương tác và khoảng trống}:
-    \begin{itemize}[noitemsep,topsep=0pt]
-        \item \texttt{click\_}\allowbreak\texttt{slope\_}\allowbreak\texttt{recent}, \texttt{click\_}\allowbreak\texttt{slope\_}\allowbreak\texttt{r2\_}\allowbreak\texttt{recent}: Hệ số góc và hệ số xác định trên 4 tuần gần nhất $[t-3, t]$.
-        \item \texttt{activity\_}\allowbreak\texttt{density\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Mật độ ngày hoạt động.
-        \item \texttt{gap\_}\allowbreak\texttt{std\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{gap\_}\allowbreak\texttt{trend\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Độ lệch chuẩn và xu hướng khoảng cách giữa các ngày hoạt động liên tiếp.
-        \item \texttt{ratio\_}\allowbreak\texttt{\{type\}\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Tỷ lệ click theo tài nguyên.
-        \item \texttt{weekend\_}\allowbreak\texttt{ratio\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Tỷ lệ click cuối tuần.
-    \end{itemize}
-    \item \textbf{Kết quả học tập}:
-    \begin{itemize}[noitemsep,topsep=0pt]
-        \item \texttt{mean\_}\allowbreak\texttt{score\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Điểm trung bình.
-        \item \texttt{weighted\_}\allowbreak\texttt{score\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Điểm trọng số.
-        \item \texttt{tma\_}\allowbreak\texttt{submission\_}\allowbreak\texttt{rate\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{cma\_}\allowbreak\texttt{submission\_}\allowbreak\texttt{rate\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Tỷ lệ nộp bài TMA và CMA.
-        \item \texttt{n\_}\allowbreak\texttt{missing\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}: Số bài đánh giá bỏ lỡ.
-    \end{itemize}
+    \item \texttt{click\_slope\_recent}, \texttt{click\_slope\_r2\_recent}: Hệ số góc và hệ số xác định hồi quy click trên 4 tuần gần nhất $[t-3, t]$.
+    \item \texttt{activity\_density\_so\_far}: Mật độ ngày hoạt động tích lũy.
+    \item \texttt{gap\_trend\_so\_far}: Xu hướng khoảng cách giữa các ngày hoạt động liên tiếp.
+    \item \texttt{weekend\_ratio\_so\_far}: Tỷ lệ click vào cuối tuần.
+    \item \texttt{ratio\_\{type\}\_so\_far}: Tỷ lệ click theo từng loại tài nguyên (\texttt{oucontent}, \texttt{forumng}, \texttt{homepage}, \texttt{quiz}).
 \end{itemize}
 
-\subsection{Features Encoding và Out-of-Time (OOT) Split}
-
-Phương pháp mã hóa các đặc trưng gồm:
+\textbf{3. Kết quả học tập tích lũy:}
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Ordinal Encoding}: Áp dụng cho các biến thứ bậc gồm \texttt{highest\_}\allowbreak\texttt{education\_}\allowbreak\texttt{encoded}, \texttt{age\_}\allowbreak\texttt{band\_}\allowbreak\texttt{encoded} và \texttt{imd\_}\allowbreak\texttt{band\_}\allowbreak\texttt{encoded}.
-    \item \textbf{Binary Encoding}: Dành cho \texttt{semester\_}\allowbreak\texttt{enc}, \texttt{gender\_}\allowbreak\texttt{encoded}, \texttt{disability\_}\allowbreak\texttt{encoded} và đợt học \texttt{module\_}\allowbreak\texttt{semester\_}\allowbreak\texttt{encoded}.
-    \item \textbf{One-hot Encoding}: Chuyển đổi vùng địa lý \texttt{region} thành 12 biến giả nhị phân. Tập dữ liệu thô ban đầu gồm 33 đặc trưng động và 25 đặc trưng tĩnh.
+    \item \texttt{mean\_score\_so\_far}: Điểm trung bình tích lũy.
+    \item \texttt{weighted\_score\_so\_far}, \texttt{has\_weighted\_score\_so\_far}: Điểm trọng số tích lũy và cờ xác nhận đã có ít nhất một bài được chấm điểm có trọng số.
+    \item \texttt{avg\_days\_before\_deadline\_so\_far}: Số ngày nộp trước hạn trung bình.
+    \item \texttt{tma\_submission\_rate\_so\_far}, \texttt{cma\_submission\_rate\_so\_far}: Tỷ lệ nộp bài TMA và CMA.
+    \item \texttt{cum\_n\_submitted}: Tổng số bài đánh giá đã nộp.
 \end{itemize}
 
-Chiến lược phân chia Out-of-Time (OOT) theo kỳ học thực tế:
+\subsection{OOT Split, Features Encoding và Chuẩn hóa}
+
+Chiến lược phân chia Out-of-Time (OOT) theo kỳ học thực tế được thực hiện trước tiên để tránh rò rỉ thông tin:
 \begin{itemize}[noitemsep,topsep=0pt]
     \item \textbf{Tập Train (21.333 lượt học)}: Gồm dữ liệu sinh viên thuộc các kỳ học cũ (\texttt{2013B}, \texttt{2013J}, \texttt{2014B}).
     \item \textbf{Tập Test (11.260 lượt học)}: Gồm dữ liệu sinh viên thuộc kỳ học cuối cùng (\texttt{2014J}).
 \end{itemize}
 
-Dữ liệu sau khi phân chia được kết xuất thành ba định dạng phục vụ huấn luyện:
+Sau khi phân chia, toàn bộ encoder và scaler đều được \texttt{fit} chỉ trên tập Train rồi \texttt{transform} sang tập Test. Phương pháp mã hóa gồm:
 \begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{LONG Format} (\texttt{df\_train\_long.csv}, \texttt{df\_test\_long.csv}): Dạng bảng tuần (\textit{panel data}, 25 dòng/lượt học) cho LSTM và Transformer.
-    \item \textbf{WIDE Format} (\texttt{df\_train.csv}, \texttt{df\_test.csv}): Dạng phẳng (snapshot tại tuần học cuối $T=24$) cho XGBoost và LightGBM.
-    \item \textbf{TENSOR Format} (các file \texttt{.npy}): Các mảng numpy 3D/2D đã chuẩn hóa để nạp trực tiếp vào PyTorch.
+    \item \textbf{Ordinal Encoding}: Áp dụng cho các biến thứ bậc gồm \texttt{highest\_}\allowbreak\texttt{education\_}\allowbreak\texttt{encoded}, \texttt{age\_}\allowbreak\texttt{band\_}\allowbreak\texttt{encoded} và \texttt{imd\_}\allowbreak\texttt{band\_}\allowbreak\texttt{encoded}.
+    \item \textbf{Binary Encoding}: Dành cho \texttt{semester\_}\allowbreak\texttt{enc}, \texttt{gender\_}\allowbreak\texttt{encoded}, \texttt{disability\_}\allowbreak\texttt{encoded} và đợt học \texttt{module\_}\allowbreak\texttt{semester\_}\allowbreak\texttt{encoded}.
+    \item \textbf{One-hot Encoding}: Chuyển đổi vùng địa lý \texttt{region} thành 12 biến giả nhị phân.
 \end{itemize}
 
-\subsection{Chuẩn hóa dữ liệu với Causal Scaling}
-
-Chuẩn hóa dữ liệu bằng \texttt{StandardScaler} tránh rò rỉ thông tin từ tập Test vào tập Train.
+Các đặc trưng số tiếp theo được chuẩn hóa bằng \texttt{StandardScaler} (fit trên Train, transform trên cả Train và Test).
 
 \subsection{Phân tích tương quan và Lọc bỏ đặc trưng (Feature Selection)}
 
@@ -109,7 +92,18 @@ Quy trình lọc bỏ đặc trưng:
 
 Kết quả của quá trình lọc chọn đặc trưng:
 \begin{itemize}[noitemsep,topsep=0pt]
-\item \textbf{Dynamic Features}: Loại bỏ \textbf{5 đặc trưng}: \texttt{ratio\_}\allowbreak\texttt{subpage\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{n\_}\allowbreak\texttt{submitted\_}\allowbreak\texttt{week}, \texttt{ratio\_}\allowbreak\texttt{url\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{gap\_}\allowbreak\texttt{std\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{weekend\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}.    \item \textbf{Static Features}: Loại bỏ \textbf{3 đặc trưng}: 3 biến giả khu vực địa lý (\texttt{region\_Scotland} (p = 0.76), \texttt{region\_East\_Midlands\_Region} (p = 0.16), \texttt{region\_Wales} (p = 0.06))
+    \item \textbf{Dynamic Features}: Loại bỏ \textbf{5 đặc trưng}: \texttt{ratio\_}\allowbreak\texttt{subpage\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{n\_}\allowbreak\texttt{submitted\_}\allowbreak\texttt{week}, \texttt{ratio\_}\allowbreak\texttt{url\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{gap\_}\allowbreak\texttt{std\_}\allowbreak\texttt{so\_}\allowbreak\texttt{far}, \texttt{weekend\_}\allowbreak\texttt{clicks\_}\allowbreak\texttt{week}.    
+    \item \textbf{Static Features}: Loại bỏ \textbf{3 đặc trưng}: 3 biến giả khu vực địa lý (\texttt{region\_Scotland} (p = 0.76), \texttt{region\_East\_Midlands\_Region} (p = 0.16), \texttt{region\_Wales} (p = 0.06)).
 \end{itemize}
-Mô hình LSTM và Transformer cuối cùng sẽ chỉ tiếp nhận chuỗi Tensor \texttt{X\_seq} gồm 34 đặc trưng động và Tensor tĩnh \texttt{X\_static} gồm 16 đặc trưng tĩnh đã được tinh lọc.\par
+Mô hình LSTM và Transformer cuối cùng sẽ chỉ tiếp nhận chuỗi Tensor \texttt{X\_seq} gồm 20 đặc trưng động và Tensor tĩnh \texttt{X\_static} gồm 20 đặc trưng tĩnh đã được tinh lọc.
+
+\subsection{Các định dạng dữ liệu đầu ra phục vụ huấn luyện}
+
+Tập dữ liệu sau khi tinh lọc còn lại \textbf{20 đặc trưng động} và \textbf{20 đặc trưng tĩnh} được kết xuất thành ba định dạng cấu trúc khác nhau để phục vụ song song cho các pha huấn luyện mô hình:
+\begin{itemize}[noitemsep,topsep=0pt]
+    \item \textbf{LONG Format} (\texttt{df\_train\_long.csv}, \texttt{df\_test\_long.csv}): Dạng bảng tuần (\textit{panel data}, 25 dòng/lượt học) cho LSTM và Transformer.
+    \item \textbf{WIDE Format} (\texttt{df\_train.csv}, \texttt{df\_test.csv}): Dạng phẳng (snapshot tại tuần học cuối $T \in \{4, 8, 12, 16, 20, 24\}$) cho XGBoost và LightGBM.
+    \item \textbf{TENSOR Format} (các file \texttt{.npy}): Các mảng numpy 3D/2D đã chuẩn hóa để nạp trực tiếp vào PyTorch.
+\end{itemize}
+
 \endgroup

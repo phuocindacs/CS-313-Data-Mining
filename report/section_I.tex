@@ -92,7 +92,7 @@ Hai hướng tiếp cận mô hình sử dụng chung dữ liệu FE này:
 \begin{itemize}[noitemsep,topsep=0pt]
     \item \textbf{Mô hình cây (XGBoost, LightGBM)}: Dự đoán
     tại các mốc tuần \{4, 8, 12, 16, 20, 24\}. Tại mỗi mốc tuần $t$,
-    mô hình chỉ nhìn dữ liệu từ ngày $0$ đến ngày $7t - 1$, đảm bảo
+    mô hình chỉ nhìn dữ liệu từ ngày $0$ đến ngày $7(t + 1) - 1$, đảm bảo
     không rò rỉ thông tin từ tương lai.
     \item \textbf{Mô hình chuỗi (LSTM, Transformer)}: Nhận toàn bộ
     chuỗi 25 tuần dưới dạng panel. Tại mỗi tuần $t$, mô hình chỉ
