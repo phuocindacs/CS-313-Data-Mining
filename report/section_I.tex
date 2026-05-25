@@ -1,7 +1,7 @@
 % ============================================================
 %  KHÁM PHÁ DỮ LIỆU (EDA)
 % ============================================================
-\section{Khám phá dữ liệu (Exploratory Data Analysis)}
+\section{Khám phá dữ liệu}
 
 % ------------------------------------------------------------
 \subsection{Tổng quan dataset và phân phối biến mục tiêu}
@@ -56,10 +56,10 @@ hai nhóm. Điều này giúp tránh tình trạng mô hình dự đoán thiên 
 % ------------------------------------------------------------
 \subsection{Phân tích null ngữ nghĩa và kiểm toán rò rỉ dữ liệu}
 
-\subsubsection{Phân tích toán tử khuyết mang ngữ nghĩa (Semantic Null)}
+\subsubsection{Phân tích toán tử khuyết mang ngữ nghĩa}
 
 Đối với bộ dữ liệu OULAD, các 
-  giá trị rỗng không đơn thuần biểu thị sự thiếu hụt dữ liệu (Missing Data), 
+  giá trị rỗng không đơn thuần biểu thị sự thiếu hụt dữ liệu,
   mà ngược lại, mỗi vị trí \texttt{null} đều mang một ngữ nghĩa cụ thể:
 
 \begin{center}
@@ -77,7 +77,7 @@ hai nhóm. Điều này giúp tránh tình trạng mô hình dự đoán thiên 
 \end{tabular}
 \end{center}
 
-Lưu ý hai con số dễ gây nhầm: \textbf{69,1\%} là tỷ lệ null trên \textit{toàn bộ} dữ liệu, còn \textbf{99,1\%} là tỷ lệ người học \textit{Withdrawn} có ghi nhận ngày rút môn. Nói cách khác, gần như chỉ nhóm Withdrawn mới có giá trị này, biến nó thành biến đại diện (\textit{proxy}) cho nhãn mục tiêu. Do thông tin chỉ phát sinh sau khi người học rút môn, giữ lại sẽ gây rò rỉ dữ liệu (\textit{data leakage}); vì vậy nhóm loại bỏ đặc trưng này.
+Lưu ý hai con số dễ gây nhầm: \textbf{69,1\%} là tỷ lệ null trên \textit{toàn bộ} dữ liệu, còn \textbf{99,1\%} là tỷ lệ người học \textit{Withdrawn} có ghi nhận ngày rút môn. Nói cách khác, gần như chỉ nhóm Withdrawn mới có giá trị này, biến nó thành biến đại diện cho nhãn mục tiêu. Do thông tin chỉ phát sinh sau khi người học rút môn, giữ lại sẽ gây rò rỉ dữ liệu; vì vậy nhóm loại bỏ đặc trưng này.
 
 \subsubsection{Chọn cut-off theo data}
 
@@ -96,9 +96,8 @@ Hai hướng tiếp cận mô hình sử dụng chung dữ liệu FE này:
     không rò rỉ thông tin từ tương lai.
     \item \textbf{Mô hình chuỗi (LSTM, Transformer)}: Nhận toàn bộ
     chuỗi 25 tuần dưới dạng panel. Tại mỗi tuần $t$, mô hình chỉ
-    quan sát dữ liệu đến tuần $t$ nhờ cơ chế che nhân quả
-    (\textit{causal masking}), cho phép dự đoán liên tục mà không cần
-    mốc cắt cố định.
+    quan sát dữ liệu đến tuần $t$ nhờ cơ chế che nhân quả,
+    cho phép dự đoán liên tục mà không cần mốc cắt cố định.
 \end{itemize}
 
 \subsubsection{Kiểm toán rò rỉ dữ liệu}
@@ -156,7 +155,7 @@ ordinal để bảo toàn quan hệ monotonic cho tree-based model.
 
 Đặc trưng \texttt{disability} (dù có $\chi^2 = 138{,}5$) được loại bỏ vì lý do đạo đức. Sử dụng tình trạng khuyết tật như một yếu tố dự báo kết quả học tập có thể dẫn đến phân biệt đối xử và không công bằng với nhóm học sinh có khuyết tật. Do đó, mô hình chỉ sử dụng 4 biến nhân khẩu học còn lại.
 
-\subsubsection{Hiệu ứng kỳ học (Semester B vs J)}
+\subsubsection{Hiệu ứng kỳ học (kỳ B và kỳ J)}
 
 Pass rate kỳ B (tháng 2) $= 43{,}67\%$ ($n=12.488$), kỳ J (tháng 10)
 $= 49{,}40\%$ ($n=20.105$). Chênh lệch không đồng đều theo module: CCC
