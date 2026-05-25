@@ -85,7 +85,12 @@ Các đặc trưng số tiếp theo được chuẩn hóa bằng \texttt{Standar
 \subsection{Phân tích tương quan và Lọc bỏ đặc trưng (Feature Selection)}
 
 Quy trình lọc bỏ đặc trưng:
+
 \begin{itemize}[noitemsep,topsep=0pt]
+    \item \textbf{Loại bỏ vì lý do đạo đức (Fairness)}: Loại bỏ 
+    \texttt{gender\_}\allowbreak\texttt{encoded} và 
+    \texttt{disability\_}\allowbreak\texttt{encoded} để tránh 
+    phân biệt đối xử trong dự đoán.
     \item \textbf{Kiểm định tương quan Pearson}: Tính toán tương quan giữa từng đặc trưng số động với nhãn mục tiêu tại tuần cuối cùng ($T = 24$), giữ lại các đặc trưng có $|corr| \ge 0{,}05$.
     \item \textbf{Kiểm định Chi-square ($\chi^2$)}: Loại bỏ các đặc trưng có mức ý nghĩa $p\text{-value} > 0{,}05$.
 \end{itemize}
