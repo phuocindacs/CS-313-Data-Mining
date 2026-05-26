@@ -139,22 +139,3 @@ def render():
             else:
                 st.info(f"{m}: not loaded")
 
-    # --- Consensus (majority vote) ---
-    all_labels = (
-        [p["label"] for p in ml_preds.values()] +
-        [p["label"] for p in dl_preds.values()]
-    )
-    if all_labels:
-        n_risk = sum(1 for l in all_labels if l == "At-Risk")
-        n_total = len(all_labels)
-        consensus = "At-Risk" if n_risk > n_total / 2 else "Not At-Risk"
-        badge_cls2 = "badge-risk" if consensus == "At-Risk" else "badge-safe"
-        st.divider()
-        st.markdown(f"""
-        <div style="text-align:center; padding:12px;">
-            <span class="section-title">Majority vote</span><br>
-            <span style="font-size:26px; font-weight:700;">{n_risk}/{n_total} models predict At-Risk</span>
-            &nbsp;&nbsp;
-            <span class="badge {badge_cls2}" style="font-size:15px;">{consensus}</span>
-        </div>
-        """, unsafe_allow_html=True)
