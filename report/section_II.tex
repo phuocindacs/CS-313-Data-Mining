@@ -39,7 +39,7 @@ Quy trình làm sạch dữ liệu thô bao gồm:
 
 Đặc trưng tại tuần $t$ chỉ được tổng hợp từ dữ liệu phát sinh từ ngày $0$ đến $7(t+1) - 1$ để đảm bảo tính nhân quả. Bao gồm ba nhóm:
 
-\textbf{1. Tương tác VLE tích lũy:}
+\subsubsection{Tương tác VLE tích lũy}
 \begin{itemize}[noitemsep,topsep=0pt]
     \item \texttt{clicks\_this\_week}: Tổng click trong tuần $t$.
     \item \texttt{cum\_active\_days}: Số ngày tương tác tích lũy.
@@ -47,7 +47,7 @@ Quy trình làm sạch dữ liệu thô bao gồm:
     \item \texttt{days\_since\_last\_active}: Số ngày kể từ lần tương tác cuối.
 \end{itemize}
 
-\textbf{2. Xu hướng tương tác và khoảng trống:}
+\subsubsection{Xu hướng tương tác và khoảng trống}
 \begin{itemize}[noitemsep,topsep=0pt]
     \item \texttt{click\_slope\_recent}, \texttt{click\_slope\_r2\_recent}: Hệ số góc và hệ số xác định hồi quy click trên 4 tuần gần nhất $[t-3, t]$.
     \item \texttt{activity\_density\_so\_far}: Mật độ ngày hoạt động tích lũy.
@@ -56,7 +56,7 @@ Quy trình làm sạch dữ liệu thô bao gồm:
     \item \texttt{ratio\_\{type\}\_so\_far}: Tỷ lệ click theo từng loại tài nguyên (\texttt{oucontent}, \texttt{forumng}, \texttt{homepage}, \texttt{quiz}).
 \end{itemize}
 
-\textbf{3. Kết quả học tập tích lũy:}
+\subsubsection{Kết quả học tập tích lũy}
 \begin{itemize}[noitemsep,topsep=0pt]
     \item \texttt{mean\_score\_so\_far}: Điểm trung bình tích lũy.
     \item \texttt{weighted\_score\_so\_far}, \texttt{has\_weighted\_score\_so\_far}: Điểm trọng số tích lũy và cờ xác nhận đã có ít nhất một bài được chấm điểm có trọng số.
