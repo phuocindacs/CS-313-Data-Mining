@@ -28,22 +28,12 @@ def _render_waterfall(shap_data: dict, max_display: int = 15):
 
     explanation = shap.Explanation(values=sv, base_values=bv, data=fv, feature_names=names)
 
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, _ = plt.subplots(figsize=(10, 7))
     shap.plots.waterfall(explanation, max_display=max_display, show=False)
-
-    # Expand x-axis to show all bars properly by calculating cumulative extent
-    cumsum = np.cumsum(sv)  # cumulative contributions
-    all_positions = np.concatenate([[0], cumsum])  # include base (0)
-    min_pos = np.min(all_positions)
-    max_pos = np.max(all_positions)
-
-    x_min = bv + min_pos - 0.05
-    x_max = bv + max_pos + 0.05
-
-    # Force set xlim on all axes in the figure
+    x_min = min(bv + sum(v for v in sv if v < 0) - 0.05, -0.05)
+    x_max = max(bv + sum(v for v in sv if v > 0) + 0.05, 0.25)
     for axes in fig.get_axes():
         axes.set_xlim(x_min, x_max)
-
     plt.tight_layout()
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
